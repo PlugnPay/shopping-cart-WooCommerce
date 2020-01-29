@@ -9,23 +9,24 @@ Stable tag: 3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Accept payments on your WooCommerce website with PlugnPay’s secure payment modules.
+This Payment Gateway For WooCommerce extends the functionality of WooCommerce to accept payments using the PlugnPay Payment Gateway
 
 == Description ==
 
-<h3>PlugnPay SSv2 Payment Gateway for WooCommerce</h3> makes your website ready to use PlugnPay payment gateway to accept payments on your ecommerce store in a safe way.
+<h3>PlugnPay SSv2 Payment Gateway for WooCommerce</h3> makes your website ready to use PlugnPay payment gateway to accept payments on your ecommerce store in safe way.
 
 PlugnPay is a widely used payment gateway to process payments online and accepts Visa, MasterCard, Discover and other variants payment options.
-<h3>Latest WooCommerce v3.9.x Compatible</h3>
+<h3>Latest WooCommerce v2.x.x Compatible</h3>
 = Features =
 Few features of this plugin:
 
 1. No SSL required
-2. No extra PCI overhead
+2. No PCI required
 3. Easy to install and configure
 4. Option to configure success & failure message
-5. A safe way to process credit/debit cards on WooCommerce using PlugnPay's Smart Screens v2 payment method.
-6. Payment data is collected on PlugnPay’s secured servers.
+5. Safe way to process credit cards and debit cards on WooCommerce using PlugnPay's Smart Screens v2 payment method.
+6. This plugin use hosted solution provided by Plugnpay and payment is processed on secured servers of PlugnPay
+7. Now with Option to use Authorize only mode.
 
 == Installation ==
 
@@ -56,13 +57,11 @@ Description: This will appear on checkout page as description for this payment g
 
 Gateway Username: This is the username provided to you by PlugnPay. (Note: This is the same username you use to login to the PlugnPay Merchant Administration area.)
 
-Transaction Success Message: This message will appear upon the transaction is successful. You can customize this message as per your needs.
+Transaction Success Message: This message will appear upon the tranaction is successful. You can customize this message as per your needs.
 
-Transaction Failed Message: This message will appear upon the transaction is declined/failed. You can customize this message as per your needs.
+Transaction Failed Message: This message will appear upon the tranaction is declined/failed. You can customize this message as per your needs.
 
 Transaction Settlement: Select if you'd like the cart to mark approved payments for settlement for you.
-
-3D Secure Checkout: Select only if you require 3D secure checkout functionality. (Note: Merchants must configure their 3D secure program with us before activating.)
 ---------------------------------------------
 
 12. once completed. click on the "Save Changes" button to make those adjustments active immediatly.
@@ -73,35 +72,28 @@ Transaction Settlement: Select if you'd like the cart to mark approved payments 
 SSL is not required
 
 == Screenshots ==
-* None Available
+* None Availble
 
 == Changelog ==
-= 1.1.2 =
-* WooCommerce v3.9.1 tweaks
-* Additional bugs fixed
-* Minor code optimizations
-
-= 1.1.1 =
-* Bugs fixed
-* Added 3D secure checkout setting
-
-= 1.1.0 =
-* Bug fixes
-* Minor code clean-up
-* Tested WooCommerce v2.6.13 Compatible
-
-= 1.0.2 =
-* First Production Version
-* Tested WooCommerce v2.2.11 compatible
+= 1.0.0 =
+* Alpha Version
 
 = 1.0.1 =
 * Beta Version
 
-= 1.0.0 =
-* Alpha Version
+= 1.0.2 =
+* First Production Version
+* Tested WooCommerce v2.2.11 Compatible
+
+= 1.1.0 =
+* Bug fixes
+* Optional tweak to set order status to 'Completed' [instead of 'Processing'], upon successful payment
+* Minor code clean-up
+* Tested WooCommerce v2.6.13 Compatible
 
 == Upgrade Notice ==
-* Upgrade is required, if your module version is below v1.1.2
+* Upgrade is required, if your module version is below v1.1.0
 
 == Arbitrary section ==
+
 

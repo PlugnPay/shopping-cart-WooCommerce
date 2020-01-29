@@ -2,7 +2,7 @@
 /*
    Plugin Name: CardX Payment Gateway For WooCommerce
    Description: Extends WooCommerce to Process Payments with CardX gateway.
-   Version: 1.1.1
+   Version: 1.1.2
    Plugin URI: http://paywithcardx.com
    Author: CardX
    Author URI: http://paywithcardx.com
@@ -157,17 +157,15 @@ function woocommerce_tech_autho_init() {
             $order                  = new WC_Order($_POST['pt_order_classifier']);
             if (($_POST['pi_response_code'] != '') && ($_POST['pi_response_status'] ==  'success')) {
                try{
-                  $amount           = $_POST['pt_transaction_amount'];
-                  $hash             = $_POST['pt_transaction_response_hash'];
                   $transauthorised  = false;
 
-                  if ($order->status != 'completed') {
+                  if ($order->get_status() != 'completed') {
                      if ( $_POST['pi_response_status'] == 'success' ) {
                         $transauthorised        = true;
                         $this->msg['message']   = $this->success_message;
                         $this->msg['class']     = 'success';
 
-                        if ( $order->status == 'processing' ) {
+                        if ( $order->get_status() == 'processing' ) {
                            // do nothing...
                         }
                         else{
@@ -234,30 +232,30 @@ function woocommerce_tech_autho_init() {
          $cardx_args = array(
             'pt_client_identifier'     => 'woocommerce_ss2',
             'pt_gateway_account'       => $this->gateway_account,
-            'pt_transaction_amount'    => $order->order_total,
+            'pt_transaction_amount'    => $order->get_total(),
             'pt_order_classifier'      => $order_id,
             'pb_transition_type'       => 'hidden',
             'pb_success_url'           => $success_url,
             'pd_collect_company'       => 'yes',
-            'pt_billing_name'          => $order->billing_first_name . ' '. $order->billing_last_name,
-            'pt_billing_company'       => $order->billing_company,
-            'pt_billing_address_1'     => $order->billing_address_1,
-            'pt_billing_address_2'     => $order->billing_address_2,
-            'pt_billing_country'       => $order->billing_country,
-            'pt_billing_state'         => $order->billing_state,
-            'pt_billing_city'          => $order->billing_city,
-            'pt_billing_postal_code'   => $order->billing_postcode,
-            'pt_billing_phone_number'  => $order->billing_phone,
-            'pt_billing_email_address' => $order->billing_email,
+            'pt_billing_name'          => $order->get_billing_first_name() . ' '. $order->get_billing_last_name(),
+            'pt_billing_company'       => $order->get_billing_company(),
+            'pt_billing_address_1'     => $order->get_billing_address_1(),
+            'pt_billing_address_2'     => $order->get_billing_address_2(),
+            'pt_billing_country'       => $order->get_billing_country(),
+            'pt_billing_state'         => $order->get_billing_state(),
+            'pt_billing_city'          => $order->get_billing_city(),
+            'pt_billing_postal_code'   => $order->get_billing_postcode(),
+            'pt_billing_phone_number'  => $order->get_billing_phone(),
+            'pt_billing_email_address' => $order->get_billing_email(),
             'pd_collect_shipping_information' => 'yes',
-            'pt_shipping_name'         => $order->shipping_first_name .' '. $order->shipping_last_name,
-            'pt_shipping_company'      => $order->shipping_company,
-            'pt_shipping_address_1'    => $order->shipping_address_1,
-            'pt_shipping_address_2'    => $order->shipping_address_2,
-            'pt_shipping_country'      => $order->shipping_country,
-            'pt_shipping_state'        => $order->shipping_state,
-            'pt_shipping_city'         => $order->shipping_city,
-            'pt_shipping_postal_code'  => $order->shipping_postcode,
+            'pt_shipping_name'         => $order->get_shipping_first_name() .' '. $order->get_shipping_last_name(),
+            'pt_shipping_company'      => $order->get_shipping_company(),
+            'pt_shipping_address_1'    => $order->get_shipping_address_1(),
+            'pt_shipping_address_2'    => $order->get_shipping_address_2(),
+            'pt_shipping_country'      => $order->get_shipping_country(),
+            'pt_shipping_state'        => $order->get_shipping_state(),
+            'pt_shipping_city'         => $order->get_shipping_city(),
+            'pt_shipping_postal_code'  => $order->get_shipping_postcode(),
           );
 
          if ( $this->post_auth == 'yes') {

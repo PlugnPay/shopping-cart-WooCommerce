@@ -1,12 +1,13 @@
 <?php
 /*
-   Plugin Name: PlugnPay SSv1 Payment Gateway For WooCommerce
+   Plugin Name: PlugnPay Payment Gateway For WooCommerce
    Description: Extends WooCommerce to Process Payments with PlugnPay gateway.
-   Version: 1.1.2
+   Version: 1.1.0
    Plugin URI: http://www.plugnpay.com
    Author: PlugnPay
    Author URI: http://www.plugnpay.com
    License: Under GPL2
+
 */
 
 add_action('plugins_loaded', 'woocommerce_tech_autho_init', 0);
@@ -29,8 +30,8 @@ function woocommerce_tech_autho_init() {
 
       public function __construct() {
          $this->id               = 'plugnpay';
-         $this->method_title     = __('PlugnPay SSv1', 'tech');
-         $this->icon             = WP_PLUGIN_URL . '/' . plugin_basename(dirname(__FILE__)) . '/images/logo.png';
+         $this->method_title     = __('PlugnPay SSv2', 'tech');
+         $this->icon             = WP_PLUGIN_URL . "/" . plugin_basename(dirname(__FILE__)) . '/images/logo.png';
          $this->has_fields       = false;
          $this->init_form_fields();
          $this->init_settings();
@@ -40,8 +41,8 @@ function woocommerce_tech_autho_init() {
          $this->post_auth        = $this->settings['post_auth'];
          $this->success_message  = $this->settings['success_message'];
          $this->failed_message   = $this->settings['failed_message'];
-         $this->msg['message']   = '';
-         $this->msg['class']     = '';
+         $this->msg['message']   = "";
+         $this->msg['class']     = "";
 
          add_action('init', array(&$this, 'check_plugnpay_response'));
          //update for woocommerce >2.0
@@ -94,12 +95,7 @@ function woocommerce_tech_autho_init() {
              'title'           => __('Transaction Settlement'),
              'type'            => 'select',
              'options'         => array( 'yes'=>'Authorize and Settle', 'no'=>'Authorize Only'),
-             'description'     => "Transaction Settlement. If you are not sure what to use set to 'Authorize and Settle'"),
-           'tdsflag'         => array(
-             'title'           => __('3D Secure Checkout'),
-             'type'            => 'select',
-             'options'         => array( 'yes'=>'Enable', 'no'=>'Disable'),
-             'description'     => "3D Secure Checkout. * Merchant MUST be subscribed to an authorized 3D secure program.  Contact technical support for details.")
+             'description'     => "Transaction Settlement. If you are not sure what to use set to 'Authorize and Settle'")
          );
       }
 
@@ -158,23 +154,26 @@ function woocommerce_tech_autho_init() {
             $redirect_url = '';
             $this->msg['class']     = 'error';
             $this->msg['message']   = $this->failed_message;
-            $order                  = new WC_Order($_POST['order-id']);
-            if (($_POST['FinalStatus'] != '') && ($_POST['FinalStatus'] ==  'success')) {
+            $order                  = new WC_Order($_POST['pt_order_classifier']);
+            $hash_key               = ($this->hash_key != '') ? $this->hash_key : '';
+            if (($_POST['pi_response_code'] != '') && ($_POST['pi_response_status'] ==  'success')) {
                try{
+                  $amount           = $_POST['pt_transaction_amount'];
+                  $hash             = $_POST['pt_transaction_response_hash'];
                   $transauthorised  = false;
 
-                  if ($order->get_status() != 'completed') {
-                     if ( $_POST['FinalStatus'] == 'success' ) {
+                  if ($order->status != 'completed') {
+                     if ( $_POST['pi_response_status'] == 'success' ) {
                         $transauthorised        = true;
                         $this->msg['message']   = $this->success_message;
                         $this->msg['class']     = 'success';
 
-                        if ( $order->get_status() == 'processing' ) {
+                        if ( $order->status == 'processing' ) {
                            // do nothing...
                         }
                         else{
-                            $order->payment_complete($_REQUEST['orderID']);
-                            $order->add_order_note('PlugnPay payment successful<br/>Ref Number/Transaction ID: '.$_REQUEST['orderID']);
+                            $order->payment_complete($_REQUEST['pt_order_id']);
+                            $order->add_order_note('PlugnPay payment successful<br/>Ref Number/Transaction ID: '.$_REQUEST['pt_order_id']);
                             $order->add_order_note($this->msg['message']);
 			    /**
 			     * NOTE: By default, WooCommerce changed the order's status from 'Pending Payment' to 'Processing'.
@@ -200,7 +199,7 @@ function woocommerce_tech_autho_init() {
                }
                catch(Exception $e) {
                    // $errorOccurred = true;
-                   $msg = 'Error';
+                   $msg = "Error";
                }
             }
             $redirect_url = $order->get_checkout_order_received_url();
@@ -233,47 +232,40 @@ function woocommerce_tech_autho_init() {
 
          $success_url = get_site_url().'/wc-api/'.get_class( $this );
 
-	 // hack to force HTTPS to HTTP
-	 //$success_url = str_replace('https://', 'http://', $success_url ); 
-
          $plugnpay_args = array(
-            'client'     => 'woocommerce_ss',
-            'publisher-name' => $this->gateway_account,
-            'card-amount'    => $order->get_total(),
-            'order-id'       => $order_id,
-            'transitiontype' => 'hidden',
-            'success-link'   => $success_url,
-            'showcompany'    => 'yes',
-            'card-name'      => $order->get_billing_first_name() . ' '. $order->get_billing_last_name(),
-            'card-company'   => $order->get_billing_company(),
-            'card-address1'  => $order->get_billing_address_1(),
-            'card-address2'  => $order->get_billing_address_2(),
-            'card-country'   => $order->get_billing_country(),
-            'card-state'     => $order->get_billing_state(),
-            'card-city'      => $order->get_billing_city(),
-            'card-zip'       => $order->get_billing_postcode(),
-            'phone'          => $order->get_billing_phone(),
-            'email'          => $order->get_billing_email(),
-            'shipinfo'       => '1',
-            'shipname'       => $order->get_shipping_first_name() .' '. $order->get_shipping_last_name(),
-            'company'        => $order->get_shipping_company(),
-            'address1'       => $order->get_shipping_address_1(),
-            'address2'       => $order->get_shipping_address_2(),
-            'country'        => $order->get_shipping_country(),
-            'state'          => $order->get_shipping_state(),
-            'city'           => $order->get_shipping_city(),
-            'zip'            => $order->get_shipping_postcode(),
+            'pt_client_identifier'     => 'woocommerce_ss2',
+            'pt_gateway_account'       => $this->gateway_account,
+            'pt_transaction_amount'    => $order->order_total,
+            'pt_order_classifier'      => $order_id,
+            'pb_transition_type'       => 'hidden',
+            'pb_success_url'           => $success_url,
+            'pd_collect_company'       => 'yes',
+            'pt_billing_name'          => $order->billing_first_name . ' '. $order->billing_last_name,
+            'pt_billing_company'       => $order->billing_company,
+            'pt_billing_address_1'     => $order->billing_address_1,
+            'pt_billing_address_2'     => $order->billing_address_2,
+            'pt_billing_country'       => $order->billing_country,
+            'pt_billing_state'         => $order->billing_state,
+            'pt_billing_city'          => $order->billing_city,
+            'pt_billing_postal_code'   => $order->billing_postcode,
+            'pt_billing_phone_number'  => $order->billing_phone,
+            'pt_billing_email_address' => $order->billing_email,
+            'pd_collect_shipping_information' => 'yes',
+            'pt_shipping_name'         => $order->shipping_first_name .' '. $order->shipping_last_name,
+            'pt_shipping_company'      => $order->shipping_company,
+            'pt_shipping_address_1'    => $order->shipping_address_1,
+            'pt_shipping_address_2'    => $order->shipping_address_2,
+            'pt_shipping_country'      => $order->shipping_country,
+            'pt_shipping_state'        => $order->shipping_state,
+            'pt_shipping_city'         => $order->shipping_city,
+            'pt_shipping_postal_code'  => $order->shipping_postcode,
           );
 
          if ( $this->post_auth == 'yes') {
-            $plugnpay_args['authtype'] = 'authpostauth';
+            $plugnpay_args['pb_post_auth'] = 'yes';
          }
          else {
-            $plugnpay_args['authtype'] = 'authonly';
-         }
-
-         if ( $this->tdsflag == 'yes') {
-            $plugnpay_args['tdsflag'] = '1';
+            $plugnpay_args['pb_post_auth'] = 'no';
          }
 
          $plugnpay_args_array = array();
@@ -282,7 +274,7 @@ function woocommerce_tech_autho_init() {
             $plugnpay_args_array[] = "<input type='hidden' name='$key' value='$value'/>";
          }
 
-         $html_form = '<form action="https://pay1.plugnpay.com/payment/pay.cgi" method="post" id="plugnpay_payment_form">'
+         $html_form = '<form action="https://pay1.plugnpay.com/pay/" method="post" id="plugnpay_payment_form">'
                . implode('', $plugnpay_args_array)
                . '<input type="submit" class="button" id="submit_plugnpay_payment_form" value="'.__('Pay via PlugnPay', 'tech').'" /> '
                . '<a class="button cancel" href="'.$order->get_cancel_order_url().'">'.__('Cancel order &amp; restore cart', 'tech').'</a>'
