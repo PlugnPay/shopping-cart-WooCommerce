@@ -34,7 +34,8 @@ fi
 
 # zip up the module, beginning at the rootOffset adjustment
 echo "==> Generating $moduleZip - Please Wait..." 
-zip -r $moduleZip $rootOffset -x '.git/*' -x .gitignore -x .editorconfig -x build.sh
+cd ./$rootOffset
+zip -r ../$moduleZip . -x '.git/*' -x .gitignore -x .editorconfig -x build.sh
 echo "==> Completed $moduleZip creation..."
 
 ## finally do a little clean-up
