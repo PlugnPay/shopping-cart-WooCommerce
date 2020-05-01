@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay API Credit Card Payment Gateway For WooCommerce
  * Plugin URI: http://www.plugnpay.com
  * Description: Extends WooCommerce to Process API Credit Card Payments with PlugnPay gateway.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_cc
@@ -238,8 +238,9 @@ function woocommerce_plugnpay_api_cc_init() {
             unset($_SESSION['order_awaiting_payment']);
           }
           return array(
-              'result'   => 'success',
-              'redirect' => get_site_url().'/checkout/order-received/'.$order->id.'/?key='.$order->order_key);
+            'result'   => 'success',
+            'redirect' => $this->get_return_url($order)
+          );
         }
         else{
           $order->add_order_note($this->failed_message . $response['MErrMsg']);

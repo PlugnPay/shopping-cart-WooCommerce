@@ -16,7 +16,7 @@ Accept payments on your WooCommerce website with PlugnPay’s secure payment mod
 <h3>PlugnPay SSv2 Payment Gateway for WooCommerce</h3> makes your website ready to use PlugnPay payment gateway to accept payments on your ecommerce store in a safe way.
 
 PlugnPay is a widely used payment gateway to process payments online and accepts Visa, MasterCard, Discover and other variants payment options.
-<h3>Latest WooCommerce v3.9.x Compatible</h3>
+<h3>Latest WooCommerce v3.9.x & v4.x Compatible</h3>
 = Features =
 Few features of this plugin:
 
@@ -26,6 +26,7 @@ Few features of this plugin:
 4. Option to configure success & failure message
 5. A safe way to process credit/debit cards on WooCommerce using PlugnPay's Smart Screens v2 payment method.
 6. Payment data is collected on PlugnPay’s secured servers.
+7. 3D Secure checkout capable for approved merchants
 
 == Installation ==
 
@@ -42,8 +43,8 @@ To configure this checkout option:
 
 7. Go to WooCommerce => Settings
 8. On the "Settings" page, select "Checkout" tab.
-9. Under "Payment Gateways" you will find all the available gateways, select "PlugnPay SSv2" option
-10. On this page you will find option to configure the plugin for use with WooCommerce
+9. Under "Payment Gateways" you will find all the available gateways, select "PlugnPay SSv2 Payment Gateway For WooCommerce" option
+10. On this page you will find options to configure the plugin for use with WooCommerce
 11. Modify the configurable elements accordingly
 [* NOTE: At minimum, check the Enable checkbox & enter your username into the Gateway Username field.  All other fields are optional.]
 
@@ -72,10 +73,18 @@ Transaction Settlement: Select if you'd like the cart to mark approved payments 
 = Is SSL Required to use this plugin? =
 SSL is not required
 
+= Is 3D Secure availble for all merchants? =
+No, merchants must have a supported 3D secure account pre-configured with us, before enabling this ability
+
 == Screenshots ==
 * None Available
 
 == Changelog ==
+= 1.1.3 = 
+* Minor syntax issue correction
+* Added 3D Secure chekkout option
+* Minor code formatting & documentation tweaks
+
 = 1.1.2 =
 * WooCommerce v3.9.1 tweaks
 * Additional bugs fixed

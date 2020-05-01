@@ -1,8 +1,8 @@
 <?php
 /*
-   Plugin Name: PlugnPay Payment Gateway For WooCommerce
-   Description: Extends WooCommerce to Process Payments with PlugnPay gateway.
-   Version: 1.1.2
+   Plugin Name: PlugnPay SSv2 Payment Gateway For WooCommerce
+   Description: Extends WooCommerce to Process Smart Screens v2 Payments with PlugnPay gateway.
+   Version: 1.1.3
    Plugin URI: http://www.plugnpay.com
    Author: PlugnPay
    Author URI: http://www.plugnpay.com
@@ -178,13 +178,13 @@ function woocommerce_tech_autho_init() {
                             $order->payment_complete($_REQUEST['pt_order_id']);
                             $order->add_order_note('PlugnPay payment successful<br/>Ref Number/Transaction ID: '.$_REQUEST['pt_order_id']);
                             $order->add_order_note($this->msg['message']);
-			    /**
-			     * NOTE: By default, WooCommerce changed the order's status from 'Pending Payment' to 'Processing'.
-			     *       For merchants wishing to bypass the 'Processing' status stage, uncomment the below line of code.
-			     *       This will force the order's status to 'Completed' within WooCommerce's Orders section for you.
-			     **/
+						    /**
+						     * NOTE: By default, WooCommerce changed the order's status from 'Pending Payment' to 'Processing'.
+						     *       For merchants wishing to bypass the 'Processing' status stage, uncomment the below line of code.
+						     *       This will force the order's status to 'Completed' within WooCommerce's Orders section for you.
+						     **/
                             // $order->update_status('completed');
-			    $woocommerce->cart->empty_cart();
+						    $woocommerce->cart->empty_cart();
                         }
                      }
                      else{
@@ -231,7 +231,7 @@ function woocommerce_tech_autho_init() {
       public function generate_plugnpay_form($order_id) {
          global $woocommerce;
 
-         $order      = new WC_Order($order_id);
+         $order = new WC_Order($order_id);
 
          $success_url = get_site_url().'/wc-api/'.get_class( $this );
 

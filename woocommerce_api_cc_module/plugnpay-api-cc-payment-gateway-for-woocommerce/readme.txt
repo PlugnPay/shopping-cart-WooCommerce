@@ -67,6 +67,9 @@ Yes, SSL is required.
 = 1.1.0 =
 * Initial Public Version
 
+- 1.1.1 =
+* Checkout return URL adjustment
+
 == Upgrade Notice ==
 * No Upgrade Required
 
