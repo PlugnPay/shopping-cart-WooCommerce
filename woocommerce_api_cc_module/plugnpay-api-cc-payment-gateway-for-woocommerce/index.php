@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay API Credit Card Payment Gateway For WooCommerce
  * Plugin URI: http://www.plugnpay.com
  * Description: Extends WooCommerce to Process API Credit Card Payments with PlugnPay gateway.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_cc
@@ -42,6 +42,9 @@ function woocommerce_plugnpay_api_cc_init() {
       $this->post_auth        = $this->settings['post_auth'];
       $this->success_message  = $this->settings['success_message'];
       $this->failed_message   = $this->settings['failed_message'];
+      $this->giftcard_allow   = $this->settings['giftcard_allow'];
+      $this->giftcard_descr   = $this->settings['giftcard_descr'];
+      $this->giftcard_note    = $this->settings['giftcard_note'];
       $this->msg['message']   = '';
       $this->msg['class']     = '';
 
@@ -95,7 +98,22 @@ function woocommerce_plugnpay_api_cc_init() {
               'title'          => __('Transaction Settlement'),
               'type'           => 'select',
               'options'        => array('yes'=>'Authorize and Settle', 'no'=>'Authorize Only'),
-              'description'    => "Transaction Settlement. If you are not sure what to use set to 'Authorize and Settle'")
+              'description'    => "Transaction Settlement. If you are not sure what to use set to 'Authorize and Settle'"),
+          'giftcard_allow'  => array(
+              'title'          => __('Giftcard Acceptance', 'tech'),
+              'type'           => 'checkbox',
+              'label'          => __('Enable to allow Mercury Giftcard Split Payments. [Mercury Giftcard ability required]', 'tech'),
+              'default'        => 'no'),
+          'giftcard_descr'  => array(
+              'title'          => __('Giftcard Description:', 'tech'),
+              'type'           => 'textarea',
+              'description'    => __('This controls the giftcard description which the user sees during checkout.', 'tech'),
+              'default'        => __('[optional] Enter your gift card details below.', 'tech')),
+          'giftcard_note'   => array(
+              'title'          => __('Giftcard Note:', 'tech'),
+              'type'           => 'textarea',
+              'description'    => __('This controls the usage note under the giftcard fields, which the user sees during checkout.', 'tech'),
+              'default'        => __('If gift card has an insufficient balance, the remainder will be automatically applied to credit card supplied.', 'tech'))
        );
     }
 
@@ -121,6 +139,12 @@ function woocommerce_plugnpay_api_cc_init() {
         echo '<label style="margin-right:30px; line-height:40px;">Expiry (MMYY) :</label> <input type="text" style="min-width:55px;" name="pnp_cardexp" size="5" maxlength="4" autocomplete="off" required /><br/>';
         echo '<label style="margin-right:89px; line-height:40px;">CVV :</label> <input type="text" style="min-width:55px;" name="pnp_cardcvv" size="5" maxlength="4" autocomplete="off" required /><br/>';
       }
+      if ($this->giftcard_allow == 'yes') {
+        echo '<div style="font-weight:normal;">&nbsp;<br/>' . wpautop(wptexturize($this->giftcard_descr)) . '</div/>';
+        echo '<label style="margin-right:46px; line-height:40px;">Gift Card :</label> <input type="text" name="pnp_mpgiftcard" size="21" maxlength="20" autocomplete="off" required /><br/>';
+        echo '<label style="margin-right:89px; line-height:40px;">CVV :</label> <input type="text" style="min-width:55px;" name="pnp_mpcvv" size="5" maxlength="4" autocomplete="off" required /><br/>';
+        echo '<div style="font-style:italic;">' . wpautop(wptexturize($this->giftcard_note)) . '</div/>';
+      }
     }
 
     /**
@@ -137,6 +161,20 @@ function woocommerce_plugnpay_api_cc_init() {
       }
       if (!$this->isCCVNumber($_POST['pnp_cardcvv'])) {
         wc_add_notice(sprintf(__('(Card Verification Number) is not valid.')), 'error');
+      }
+
+      if ($this->giftcard_allow == 'yes') {
+        $mpgiftcard = preg_replace('/[^0-9]+/', '', $_POST['pnp_mpgiftcard']);
+        $mpcvv = preg_replace('/[^0-9]+/', '', $_POST['pnp_mpcvv']);
+
+        if (!empty($mpgiftcard) || !empty($mpcvv)) {
+          if ($mpgiftcard != $_POST['pnp_mpgiftcard']) {
+            wc_add_notice(sprintf(__('(Gift Card Number) is not valid.')), 'error');
+          }
+          if ($mpcvv != $_POST['pnp_mpcvv']) {
+            wc_add_notice(sprintf(__('(Gift Card Verification Number) is not valid.')), 'error');
+          }
+        }
       }
     }
 
@@ -300,6 +338,11 @@ function woocommerce_plugnpay_api_cc_init() {
       }
       else {
         $plugnpayapi_args['authtype'] = 'authonly';
+      }
+
+      if ($this->giftcard_allow == 'yes') {
+        $plugnpayapi_args['mpgiftcard'] = $_POST['pnp_mpgiftcard'];
+        $plugnpayapi_args['mpcvv'] = $_POST['pnp_mpcvv'];
       }
 
       return $plugnpayapi_args;
