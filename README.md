@@ -3,10 +3,15 @@
 Easy to install payment modules for the WooCommerce shopping cart.
 Multiple payment styles are supported, each covering a different checkout need.
 
-* API [Remote Auth]
-* Smart Screens v2 [Gateway Hosted Solution]
-* Smart Screens v1 [Legacy Gateway Hosted Solution]
-
+* API (Remote Auth)
+  - [Download - Credit Card](./woocommerce_api_cc_module.zip)
+  - [Download - ACH/eCheck](./woocommerce_api_ach_module.zip)
+  - [Download - Gift Card](./woocommerce_api_gitcard_module.zip)
+* Smart Screens v2 (Gateway Hosted Solution)
+  - [Download](./woocommerce_ss1_module.zip)
+* Smart Screens v1 (Legacy Gateway Hosted Solution)
+  - [Download](./woocommerce_ss2_module.zip)
+  
 ## Installation
 
 For complete instructions on how to install/setup any of our WooCommerce payment modules, please refer to the README file within the zip file of that module.
