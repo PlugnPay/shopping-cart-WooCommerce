@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay API Credit Card Payment Gateway For WooCommerce
  * Plugin URI: http://www.plugnpay.com
  * Description: Extends WooCommerce to Process API Credit Card Payments with PlugnPay gateway.
- * Version: 1.1.2
+ * Version: 1.1.3
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_cc
@@ -102,7 +102,7 @@ function woocommerce_plugnpay_api_cc_init() {
           'giftcard_allow'  => array(
               'title'          => __('Giftcard Acceptance', 'tech'),
               'type'           => 'checkbox',
-              'label'          => __('Enable to allow Mercury Giftcard Split Payments. [Mercury Giftcard ability required]', 'tech'),
+              'label'          => __('Enable to allow Giftcard Split Payments. [Merchant Processor Giftcard ability required]', 'tech'),
               'default'        => 'no'),
           'giftcard_descr'  => array(
               'title'          => __('Giftcard Description:', 'tech'),
@@ -304,6 +304,7 @@ function woocommerce_plugnpay_api_cc_init() {
 
         'order-id'              => $order->id,
         'card-amount'           => $order->order_total,
+        'currency'              => $order->currency,
 
         'paymethod'             => 'credit',
         'card-number'           => $_POST['pnp_cardnumber'],
@@ -333,6 +334,8 @@ function woocommerce_plugnpay_api_cc_init() {
         'country'               => $order->shipping_country,
       );
 
+      $plugnpayapi_args['ipaddress'] = getUserIP();
+      
       if ($this->post_auth == 'yes') {
         $plugnpayapi_args['authtype'] = 'authpostauth';
       }
@@ -369,6 +372,29 @@ function plugnpay_cc_action_links ($links) {
     '<a href="https://pay1.plugnpay.com/admin/" target="_blank">Merchant Admin</a>'
   );
   return array_merge($links, $gateway_links);
+}
+
+function getUserIP() {
+  // Get real visitor IP behind CloudFlare network
+  if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
+    $_SERVER['HTTP_CLIENT_IP'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
+  }
+  $client  = @$_SERVER['HTTP_CLIENT_IP'];
+  $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
+  $remote  = $_SERVER['REMOTE_ADDR'];
+
+  if (filter_var($client, FILTER_VALIDATE_IP)) {
+    $ip = $client;
+  }
+  elseif (filter_var($forward, FILTER_VALIDATE_IP)) {
+    $ip = $forward;
+  }
+  else {
+    $ip = $remote;
+  }
+
+  return $ip;
 }
 
 ?>

@@ -4,7 +4,7 @@ Contributors: PlugnPay
 Site link: http://www.plugnpay.com
 Tags: woocommerce, plugnpay, payment, gateway, API, CC, credit card, debit card
 Requires at least: 3.0.1
-Tested up to: 4.1
+Tested up to: 4.3
 Stable tag: 3.1
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
@@ -17,7 +17,7 @@ Plugin extends the functionality of WooCommerce to accept payments from checking
 
 PlugnPay is a widely used payment gateway to process payments online and accepts Visa, MasterCard, Discover and other variants payment options; such as ACH/eCheck payments.
 
-<h3>WooCommerce 2.2.11 Compatible</h3>
+<h3>WooCommerce 4.3.x Compatible</h3>
 
 = Features =
 Few features of this plugin:
@@ -30,14 +30,13 @@ Few features of this plugin:
 6. This plugin uses internal card processing, so faster and more reliable.
 
 == Installation ==
-
 Easy steps to install the plugin:
 
 1. Upload `plugnpay-api-ach-payment-gateway-for-woocommerce` folder/directory to the `/wp-content/plugins/` directory
-2. Activate the plugin through the "Plugins" menu in WordPress.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Go to WooCommerce => Settings
-4. On the "Settings" page, select "Payment Gateways" tab.
-5. Under "Payment Gateways" you will find all the available gateways, select "PlugnPay API ACH" option
+4. On the 'Settings' page, select 'Payment Gateways' tab.
+5. Under 'Payment Gateways' you will find all the available gateways, select 'PlugnPay API ACH' option
 6. On this page you will find option to configure the plugin for use with WooCommerce
 7. Enter the API details (Gateway Username, Remote Client Password)
 8. Configurable elements:
@@ -61,14 +60,19 @@ Yes, SSL is required.
 == Screenshots ==
 
 == Changelog ==
-= 1.0.0 =
-* First Version
+= 1.1.2 =
+* Enhanced currency support, to work with multi-currency plug-ins
+* Cleaned up some code & documentation
+* Added customer's IP address to gateway API call
+
+= 1.1.1 =
+* Checkout return URL adjustment
 
 = 1.1.0 =
 * Initial Public Version
 
-= 1.1.1 =
-* Checkout return URL adjustment
+= 1.0.0 =
+* First Version
 
 == Upgrade Notice ==
 * No Upgrade Required

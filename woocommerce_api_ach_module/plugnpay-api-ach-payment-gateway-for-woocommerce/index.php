@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay API ACH/eCheck Payment Gateway For WooCommerce
  * Plugin URI: http://www.plugnpay.com
  * Description: Extends WooCommerce to Process API ACH/eCheck Payments with PlugnPay gateway.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_ach
@@ -264,6 +264,7 @@ function woocommerce_plugnpay_api_ach_init() {
 
         'order-id'              => $order->id,
         'card-amount'           => $order->order_total,
+        'currency'              => $order->currency,
 
         'paymethod'             => 'onlinecheck',
         'checktype'             => 'WEB',
@@ -295,6 +296,8 @@ function woocommerce_plugnpay_api_ach_init() {
         'zip'                   => $order->shipping_postcode,
         'country'               => $order->shipping_country,
       );
+
+      $plugnpayapi_args['ipaddress'] = getUserIP();
 
       if ($plugnpayapi_args['acctclass'] == 'business') {
         $plugnpayapi_args['commcardtype'] = 'business';
@@ -331,6 +334,29 @@ function plugnpay_ach_action_links ($links) {
     '<a href="https://pay1.plugnpay.com/admin/" target="_blank">Merchant Admin</a>'
   );
   return array_merge($links, $gateway_links);
+}
+
+function getUserIP() {
+  // Get real visitor IP behind CloudFlare network
+  if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
+    $_SERVER['HTTP_CLIENT_IP'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
+  }
+  $client  = @$_SERVER['HTTP_CLIENT_IP'];
+  $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
+  $remote  = $_SERVER['REMOTE_ADDR'];
+
+  if (filter_var($client, FILTER_VALIDATE_IP)) {
+    $ip = $client;
+  }
+  elseif (filter_var($forward, FILTER_VALIDATE_IP)) {
+    $ip = $forward;
+  }
+  else {
+    $ip = $remote;
+  }
+
+  return $ip;
 }
 
 ?>

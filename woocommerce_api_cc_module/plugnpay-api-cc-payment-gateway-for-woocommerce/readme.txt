@@ -4,7 +4,7 @@ Contributors: PlugnPay
 Site link: http://www.plugnpay.com
 Tags: woocommerce, plugnpay, payment, gateway, API, CC, credit card, debit card
 Requires at least: 3.0.1
-Tested up to: 4.1
+Tested up to: 4.3
 Stable tag: 3.1
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
@@ -17,7 +17,7 @@ Plugin extends the functionality of WooCommerce to accept payments from credit/d
 
 PlugnPay is a widely used payment gateway to process payments online and accepts Visa, MasterCard, Discover and other variants payment options.
 
-<h3>WooCommerce 2.2.11 Compatible</h3>
+<h3>WooCommerce 4.3.x Compatible</h3>
 
 = Features =
 Few features of this plugin:
@@ -28,17 +28,17 @@ Few features of this plugin:
 4. Option to configure success & failure message
 5. Safe way to process credit/debit cards on WooCommerce using PlugnPay API
 6. This plugin uses internal card processing, so faster and more reliable.
-7. [Optional] Mercury Giftcard split payment ability
+7. [Optional] Giftcard split payment ability
 
 == Installation ==
 
 Easy steps to install the plugin:
 
 1. Upload `plugnpay-api-cc-payment-gateway-for-woocommerce` folder/directory to the `/wp-content/plugins/` directory
-2. Activate the plugin through the "Plugins" menu in WordPress.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Go to WooCommerce => Settings
-4. On the "Settings" page, select "Payment Gateways" tab.
-5. Under "Payment Gateways" you will find all the available gateways, select "PlugnPay API CC" option
+4. On the 'Settings' page, select 'Payment Gateways' tab.
+5. Under 'Payment Gateways' you will find all the available gateways, select 'PlugnPay API CC' option
 6. On this page you will find option to configure the plugin for use with WooCommerce
 7. Enter the API details (Gateway Username, Remote Client Password)
 8. Configurable elements:
@@ -59,7 +59,7 @@ Transaction Failed Message: This message will appear when transaction will get f
 
 Transaction Settlement: Allows you to speciify if approved transactions should be automatically marked for settlement.
 
-Giftcard Acceptance: Allows you to accept Mercury Giftcards at time of checkout & process it as a split-payment. (Note: You must have Mercury Giftcard ability enabled in your PlugnPay account to use this.)
+Giftcard Acceptance: Allows you to accept Giftcards at time of checkout & process it as a split-payment. (Note: You must have Giftcard ability enabled in your PlugnPay account to use this.)
 
 Giftcard Description: This is what appears on checkout page as the description for the giftcard option.
 
@@ -70,23 +70,28 @@ Giftcard Note: This is what appears on checkout page below the giftcard fields.
 Yes, SSL is required.
 
 = Can anyone enable/process giftcards? =
-No, a merchant must have a giftcard account setup with Mercury & our gateway before enabling this ability.
+No, a merchant must have a giftcard account setup with a supported merchant processor & our gateway before enabling this ability.
 
 == Screenshots ==
 
 == Changelog ==
-= 1.0.0 =
-* First Version
+= 1.1.3 =
+* Enhanced currency support, to work with multi-currency plug-ins
+* Cleaned up some code & documentation
+* Added customer's IP address to gateway API call
+
+= 1.1.2 =
+* Added optional Giftcard split payment ability
+* Add missing Configurable Elements to above installation info
+
+= 1.1.1 =
+* Checkout return URL adjustment
 
 = 1.1.0 =
 * Initial Public Version
 
-- 1.1.1 =
-* Checkout return URL adjustment
-
-- 1.1.2 =
-* Added optional Mercury Giftcard split payment ability
-* Add missing Configurable Elements to above installation info
+= 1.0.0 =
+* First Version
 
 == Upgrade Notice ==
 * No Upgrade Required
