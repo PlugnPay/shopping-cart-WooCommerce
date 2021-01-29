@@ -8,9 +8,9 @@ Multiple payment styles are supported, each covering a different checkout need.
   - [Download - ACH/eCheck](./woocommerce_api_ach_module.zip)
   - [Download - Gift Card](./woocommerce_api_gitcard_module.zip)
 * Smart Screens v2 (Gateway Hosted Solution)
-  - [Download](./woocommerce_ss1_module.zip)
-* Smart Screens v1 (Legacy Gateway Hosted Solution)
   - [Download](./woocommerce_ss2_module.zip)
+* Smart Screens v1 (Legacy Gateway Hosted Solution)
+  - [Download](./woocommerce_ss1_module.zip)
   
 ## Installation
 
