@@ -13,10 +13,11 @@ Accept payments on your WooCommerce website with PlugnPay’s secure payment mod
 
 == Description ==
 
-<h3>PlugnPay SSv2 Payment Gateway for WooCommerce</h3> makes your website ready to use PlugnPay payment gateway to accept payments on your ecommerce store in a safe way.
+PlugnPay SSv2 Payment Gateway for WooCommerce makes your website ready to use PlugnPay payment gateway to accept payments on your ecommerce store in a safe way.
 
 PlugnPay is a widely used payment gateway to process payments online and accepts Visa, MasterCard, Discover and other variants payment options.
-<h3>Latest WooCommerce v3.9.x & v4.x Compatible</h3>
+Latest WooCommerce v3.9.x & v4.x Compatible
+
 = Features =
 Few features of this plugin:
 
@@ -27,6 +28,7 @@ Few features of this plugin:
 5. A safe way to process credit/debit cards on WooCommerce using PlugnPay's Smart Screens v2 payment method.
 6. Payment data is collected on PlugnPay’s secured servers.
 7. 3D Secure checkout capable for approved merchants
+8. Authorization Verification Hash ability
 
 == Installation ==
 
@@ -34,16 +36,16 @@ To install the plugin:
 
 1. Login to your WordPress admin area
 2. Go to Plugins => Add new
-3. Click on the "Upload Plugin" button
-4. Click on the "Browse" button & select this payment module's zip file
-5. Click on the "Install Now" button.
-6. Once installed, click on the "Activate Button"
+3. Click on the 'Upload Plugin' button
+4. Click on the 'Browse' button & select this payment module's zip file
+5. Click on the 'Install Now' button.
+6. Once installed, click on the 'Activate Button'
 
 To configure this checkout option:
 
 7. Go to WooCommerce => Settings
-8. On the "Settings" page, select "Checkout" tab.
-9. Under "Payment Gateways" you will find all the available gateways, select "PlugnPay SSv2 Payment Gateway For WooCommerce" option
+8. On the 'Settings' page, select 'Checkout' tab.
+9. Under 'Payment Gateways' you will find all the available gateways, select 'PlugnPay SSv2 Payment Gateway For WooCommerce' option
 10. On this page you will find options to configure the plugin for use with WooCommerce
 11. Modify the configurable elements accordingly
 [* NOTE: At minimum, check the Enable checkbox & enter your username into the Gateway Username field.  All other fields are optional.]
@@ -57,6 +59,8 @@ Description: This will appear on checkout page as description for this payment g
 
 Gateway Username: This is the username provided to you by PlugnPay. (Note: This is the same username you use to login to the PlugnPay Merchant Administration area.)
 
+Cards Allowed: This controls which card types are presented to the customer as a payment options. (Note: To prevent issues, only list cards types you actually have obtained a merchant account for.)
+
 Transaction Success Message: This message will appear upon the transaction is successful. You can customize this message as per your needs.
 
 Transaction Failed Message: This message will appear upon the transaction is declined/failed. You can customize this message as per your needs.
@@ -64,9 +68,15 @@ Transaction Failed Message: This message will appear upon the transaction is dec
 Transaction Settlement: Select if you'd like the cart to mark approved payments for settlement for you.
 
 3D Secure Checkout: Select only if you require 3D secure checkout functionality. (Note: Merchants must configure their 3D secure program with us before activating.)
+
+Authorization Hash: Select only if you require Authorization Verification Hash functionality. (Note: Merchant must configure these related settings to match their PlugnPay account before activating.)
+
+Authorization Hash Key: If using this ability, enter the corresponding verification key from your PlugnPay account.
+
+Authorization Hash Fields: If using this ability, select a fieldset to validate upon & configure your PlugnPay account to match.
 ---------------------------------------------
 
-12. once completed. click on the "Save Changes" button to make those adjustments active immediatly.
+12. once completed. click on the 'Save Changes' button to make those adjustments active immediatly.
 
 
 == Frequently Asked Questions ==
@@ -80,9 +90,21 @@ No, merchants must have a supported 3D secure account pre-configured with us, be
 * None Available
 
 == Changelog ==
+= 1.1.6 =
+* Added Authorization Verification Hash settings
+* Cleaned up code related to settings usage
+* Added missing module description in WooCommerce payments section
+
+= 1.1.5 =
+* Added Cards Allowed setting
+
+= 1.1.4 =
+* Enhanced currency support, to work with multi-currency plug-ins
+* Cleaned up some code & documentation
+
 = 1.1.3 = 
 * Minor syntax issue correction
-* Added 3D Secure chekkout option
+* Added 3D Secure checkout option
 * Minor code formatting & documentation tweaks
 
 = 1.1.2 =
