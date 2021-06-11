@@ -19,7 +19,7 @@ For complete instructions on how to install/setup any of our WooCommerce payment
 However the basic process is:
 * download the zip file of the module you want to install
 * unzip it & refer to the README file
-* upload the given files to their respective places in WooCommerce
+* upload the given file via WordPress Plugin section
 * activate the module in the WordPress Extensions section
 * configure the module in the WooCommerce Settings Payments section
 
@@ -50,6 +50,7 @@ Smart Screens v2 (CardX Build)
 
 Smart Screens v1 (Legacy)
 * TO PREVENT ISSUES, DO NOT USE THIS MODULE, UNLESS TOLD TO BY PLUGNPAY STAFF!
+* USE THE SMART SCREENS V2 MODULE INSTEAD FOR BEST RESULTS.
 * This is a legacy version of our Smart Screens payment method, for older/custom PnP accounts.
 * Supports Credit Card &/or ACH/eCheck payment options configured with us.
 * WooCommerce will NOT collect any sensitive payment info from the customer at checkout.
@@ -57,20 +58,4 @@ Smart Screens v1 (Legacy)
 * Our payment gateway will directly collect the payment data via our secure billing pages.
 * After the payment info is submitted & approved, we'll redirect the customer back to WooCommerce.
 * This module does NOT require the given site to be SSL secured, but its still HIGHLY recommended.
-
-## History
-
-API
-* Remote Auth
-* Seperate modules for Credit Card & ACH/eCheck
-
-Smart Screens v2
-* Gateway Hosted Solution
-* Generic version for all PlugnPay clients
-* Customized version for CardX specific clients
-
-Smart Screens v1
-* Legacy Gateway Hosted Solution
-* Generic version for all PlugnPay clients with Legacy payment needs
-* USE THE SMART SCREENS V2 MODULE INSTEAD FOR BEST RESULTS.
 
