@@ -1,9 +1,9 @@
 <?php
 /*
  * Plugin Name: PlugnPay API ACH/eCheck Payment Gateway For WooCommerce
- * Plugin URI: http://www.plugnpay.com
+ * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process API ACH/eCheck Payments with PlugnPay gateway.
- * Version: 1.1.2
+ * Version: 1.1.3
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_ach
@@ -29,21 +29,18 @@ function woocommerce_plugnpay_api_ach_init() {
     protected $msg = array();
 
     public function __construct() {
-      $this->id               = 'plugnpay_api_ach';
-      $this->method_title     = __('PlugnPay API ACH', 'tech');
-      $this->icon             = WP_PLUGIN_URL . '/' . plugin_basename(dirname(__FILE__)) . '/images/logo.png';
-      $this->has_fields       = true;
+      $this->id                 = 'plugnpay_api_ach';
+      $this->method_title       = __('PlugnPay API ACH', 'tech');
+      $this->method_description = __('Accept ACH/eCheck payments via API payment method, directly in WooCommerce.', 'tech');
+      $this->icon               = WP_PLUGIN_URL . '/' . plugin_basename(dirname(__FILE__)) . '/images/echeck.png';
+      $this->sample_check       = WP_PLUGIN_URL . '/' . plugin_basename(dirname(__FILE__)) . '/images/sample-check.png';
+      $this->has_fields         = true;
       $this->init_form_fields();
       $this->init_settings();
-      $this->title            = $this->settings['title'];
-      $this->description      = $this->settings['description'];
-      $this->gateway_account  = $this->settings['gateway_account'];
-      $this->remote_password  = $this->settings['remote_password'];
-      $this->post_auth        = $this->settings['post_auth'];
-      $this->success_message  = $this->settings['success_message'];
-      $this->failed_message   = $this->settings['failed_message'];
-      $this->msg['message']   = '';
-      $this->msg['class']     = '';
+      $this->title              = $this->settings['title'];
+      $this->description        = $this->settings['description'];
+      $this->msg['message']     = '';
+      $this->msg['class']       = '';
 
       if (version_compare(WOOCOMMERCE_VERSION,'2.0.0','>=')) {
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array(&$this,'process_admin_options'));
@@ -95,7 +92,16 @@ function woocommerce_plugnpay_api_ach_init() {
               'title'          => __('Transaction Settlement'),
               'type'           => 'select',
               'options'        => array('yes'=>'Authorize and Settle', 'no'=>'Authorize Only'),
-              'description'    => "Transaction Settlement. If you are not sure what to use set to 'Authorize and Settle'")
+              'description'    => "Transaction Settlement. If you are not sure what to use set to 'Authorize and Settle'"),
+           'divert_currency' => array(
+              'title'          => __('Divert Currency'),
+              'type'           => 'checkbox',
+              'description'    => __('Enable to divert currency to alt account. [Multiple gateway accounts required, each setup for a different currency.]', 'tech'),
+              'default'        => __('no', 'tech')),
+           'divert_accounts'  => array(
+             'title'           => __('Diverted Accounts', 'tech'),
+             'type'            => 'text',
+             'description'     => __('List currency code & username to divert specific payments to. [i.e. USD:username1,BBD:username2,CAD:username3]')),
        );
     }
 
@@ -118,7 +124,8 @@ function woocommerce_plugnpay_api_ach_init() {
       if ($this->description) {
         echo wpautop(wptexturize($this->description));
         echo '<label style="margin-right:89px; line-height:40px;">Account Type :</label> <select name="pnp_accttype"><option value="checking">Checking</option><option value="savings">Savings</option></select /><br/>';
-        echo '<label style="margin-right:89px; line-height:40px;">Routing Number :</label> <input type="text" name="pnp_routingnum" size="10" maxlength="9" autocomplete="off" required /><br/>';
+        echo '<label style="margin-right:89px; line-height:40px;">Routing Number :</label> <input type="text" name="pnp_routingnum" size="10" maxlength="9" autocomplete="off" required />';
+        echo ' <a href="' . $this->sample_check . '" style="font-size:.875em; font-weight:600;" target="help">Help</a><br/>';
         echo '<label style="margin-right:89px; line-height:40px;">Account Number :</label> <input type="text" name="pnp_accountnum" size="21" maxlength="20" autocomplete="off" required /><br/>';
         echo '<label style="margin-right:89px; line-height:40px;">Check Number :</label> <input type="text" name="pnp_checknum" size="11" maxlength="20" autocomplete="off" required /><br/>';
         echo '<label style="margin-right:89px; line-height:40px;">Classification :</label> <select name="pnp_acctclass"><option value="personal">Personal</option><option value="business">Business</option></select /><br/>';
@@ -159,15 +166,15 @@ function woocommerce_plugnpay_api_ach_init() {
       }
   
       // perform a checksum on the number
-      $one = $number[0] * 3;   // first digit X 3
-      $two = $number[1] * 7;   // second digit X 7
+      $one   = $number[0] * 3; // first digit X 3
+      $two   = $number[1] * 7; // second digit X 7
       $three = $number[2] * 1; // third digit X 1
-      $four = $number[3] * 3;  // fourth digit X 3
-      $five = $number[4] * 7;  // fifth digit X 7
-      $six = $number[5] * 1;   // sixth digit X 1
+      $four  = $number[3] * 3; // fourth digit X 3
+      $five  = $number[4] * 7; // fifth digit X 7
+      $six   = $number[5] * 1; // sixth digit X 1
       $seven = $number[6] * 3; // seventh digit X 3
       $eight = $number[7] * 7; // eighth digit X 7
-      $nine = $number[8] * 1;  // last digit X 1
+      $nine  = $number[8] * 1; // last digit X 1
 
       // sum of all the above should be equal to a multiple of 10
       // ex. 150,160,170 etc.
@@ -232,7 +239,7 @@ function woocommerce_plugnpay_api_ach_init() {
           if ($order->status != 'completed') {
             $order->payment_complete($response['orderID']);
             $woocommerce->cart->empty_cart();
-            $order->add_order_note($this->success_message. $response['MErrMsg'] . 'Transaction ID: '. $response['orderID']);
+            $order->add_order_note($this->settings['success_message'] . $response['MErrMsg'] . 'Transaction ID: '. $response['orderID']);
             unset($_SESSION['order_awaiting_payment']);
           }
           return array(
@@ -241,12 +248,12 @@ function woocommerce_plugnpay_api_ach_init() {
           );
         }
         else{
-          $order->add_order_note($this->failed_message . $response['MErrMsg']);
+          $order->add_order_note($this->settings['failed_message'] . $response['MErrMsg']);
           wc_add_notice(sprintf(__('(Transaction Error) '. $response['MErrMsg'])), 'error');
         }
       }
       else {
-        $order->add_order_note($this->failed_message);
+        $order->add_order_note($this->settings['failed_message']);
         $order->update_status('failed');
         wc_add_notice(sprintf(__('(Transaction Error) Error processing payment.')), 'error');
       }
@@ -256,15 +263,31 @@ function woocommerce_plugnpay_api_ach_init() {
     * Generate PlugnPay API CC button link
     **/
     public function generate_plugnpay_api_cc_params($order) {
+
+       $gatewayAccount = $this->settings['gateway_account'];
+       $currencyCode = $order->get_currency();
+
+       if ($this->settings['divert_currency'] == 'yes') {
+         $divert_list = explode(',', $this->settings['divert_accounts']);
+         foreach ($divert_list as $i) {
+           list($altCurrency,$altMerchant) = explode(':', $i, 2);
+           if (strtolower($altCurrency) == strtolower($order->get_currency())) {
+             $gatewayAccount = $altMerchant;
+             $currencyCode = $altCurrency;
+             break 1;
+           }
+         }
+      }
+
       $plugnpayapi_args = array(
-        'publisher-name'        => $this->gateway_account,
-        'publisher-password'    => $this->remote_password,
+        'publisher-name'        => strtolower($gatewayAccount),
+        'publisher-password'    => $this->settings['failed_message'],
         'client'                => 'WooCommerce_API_ACH',
         'mode'                  => 'auth',
 
         'order-id'              => $order->id,
         'card-amount'           => $order->order_total,
-        'currency'              => $order->currency,
+        'currency'              => strtoupper($currencyCode),
 
         'paymethod'             => 'onlinecheck',
         'checktype'             => 'WEB',
@@ -285,7 +308,7 @@ function woocommerce_plugnpay_api_ach_init() {
         'phone'                 => $order->billing_phone,
         'email'                 => $order->billing_email,
 
-        'shipinfo'              => '1',
+        'shipinfo'              => '0',
         'shipname'              => $order->shipping_first_name .' '. $order->shipping_last_name,
         'company'               => $order->shipping_company,
         'address1'              => $order->shipping_address_1,
@@ -303,7 +326,7 @@ function woocommerce_plugnpay_api_ach_init() {
         $plugnpayapi_args['commcardtype'] = 'business';
       }
 
-      if ($this->post_auth == 'yes') {
+      if ($this->settings['post_auth'] == 'yes') {
         $plugnpayapi_args['authtype'] = 'authpostauth';
       }
       else {

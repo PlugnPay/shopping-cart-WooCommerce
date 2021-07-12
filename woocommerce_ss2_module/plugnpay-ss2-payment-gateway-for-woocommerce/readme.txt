@@ -1,4 +1,4 @@
-=== Plugin Name ===
+﻿=== Plugin Name ===
 PlugnPay SSv2 Payment Gateway For WooCommerce
 Contributors: PlugnPay
 Site link: http://www.plugnpay.com
@@ -29,6 +29,7 @@ Few features of this plugin:
 6. Payment data is collected on PlugnPay’s secured servers.
 7. 3D Secure checkout capable for approved merchants
 8. Authorization Verification Hash ability
+9. Divert payments to alternative gateway accounts, based upon currency selected
 
 == Installation ==
 
@@ -74,26 +75,33 @@ Authorization Hash: Select only if you require Authorization Verification Hash f
 Authorization Hash Key: If using this ability, enter the corresponding verification key from your PlugnPay account.
 
 Authorization Hash Fields: If using this ability, select a fieldset to validate upon & configure your PlugnPay account to match.
+
+Divert Currency: Use to enable/disable ability to redirect payments to a different gateway account for specific currency types.
+
+Divert Accounts: List currency code & username to divert specific payments to. [i.e. USD:username1,BBD:username2,CAD:username3]  Currency codes not listed will use default Gateway Account.
 ---------------------------------------------
 
-12. once completed. click on the 'Save Changes' button to make those adjustments active immediatly.
+12. once completed. click on the 'Save Changes' button to make those adjustments active immediately.
 
 
 == Frequently Asked Questions ==
 = Is SSL Required to use this plugin? =
 SSL is not required
 
-= Is 3D Secure availble for all merchants? =
+= Is 3D Secure available for all merchants? =
 No, merchants must have a supported 3D secure account pre-configured with us, before enabling this ability
 
 == Screenshots ==
 * None Available
 
 == Changelog ==
+= 1.1.7 =
+* Added Divert Currency ability
+* Minor bug fixes & code clean-up
+
 = 1.1.6 =
-* Added Authorization Verification Hash settings
-* Cleaned up code related to settings usage
-* Added missing module description in WooCommerce payments section
+* Added Authorization Verification Hash setting
+* Minor code clean-up.
 
 = 1.1.5 =
 * Added Cards Allowed setting

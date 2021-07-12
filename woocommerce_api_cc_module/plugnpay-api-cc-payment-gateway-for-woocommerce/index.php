@@ -1,9 +1,9 @@
 <?php
 /*
  * Plugin Name: PlugnPay API Credit Card Payment Gateway For WooCommerce
- * Plugin URI: http://www.plugnpay.com
+ * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process API Credit Card Payments with PlugnPay gateway.
- * Version: 1.1.3
+ * Version: 1.1.4
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_cc
@@ -29,24 +29,28 @@ function woocommerce_plugnpay_api_cc_init() {
     protected $msg = array();
 
     public function __construct() {
-      $this->id               = 'plugnpay_api_cc';
-      $this->method_title     = __('PlugnPay API CC', 'tech');
-      $this->icon             = WP_PLUGIN_URL . '/' . plugin_basename(dirname(__FILE__)) . '/images/logo.png';
-      $this->has_fields       = true;
+      $this->id                 = 'plugnpay_api_cc';
+      $this->method_title       = __('PlugnPay API CC', 'tech');
+      $this->method_description = __('Accept Credit Card payments via API payment method, directly in WooCommerce.', 'tech');
+      $this->icon               = '';
+      $this->icon_path          = WP_PLUGIN_URL . '/' . plugin_basename(dirname(__FILE__)) . '/images/';
+      $this->has_fields         = true;
       $this->init_form_fields();
       $this->init_settings();
-      $this->title            = $this->settings['title'];
-      $this->description      = $this->settings['description'];
-      $this->gateway_account  = $this->settings['gateway_account'];
-      $this->remote_password  = $this->settings['remote_password'];
-      $this->post_auth        = $this->settings['post_auth'];
-      $this->success_message  = $this->settings['success_message'];
-      $this->failed_message   = $this->settings['failed_message'];
-      $this->giftcard_allow   = $this->settings['giftcard_allow'];
-      $this->giftcard_descr   = $this->settings['giftcard_descr'];
-      $this->giftcard_note    = $this->settings['giftcard_note'];
-      $this->msg['message']   = '';
-      $this->msg['class']     = '';
+      $this->title              = $this->settings['title'];
+      $this->description        = $this->settings['description'];
+      $this->cards_allowed      = $this->settings['cards_allowed'];
+      $this->msg['message']     = '';
+      $this->msg['class']       = '';
+
+      // shoehorn the cardtype icons into place. Not clean, but works...
+      $icon = '">';
+      $cards_list = explode(',', $this->cards_allowed);
+      foreach ($cards_list as $i) {
+        $icon .= '<img src="' . $this->icon_path . strtolower($i) . '.png" style="border:1px #999 solid; margin-left:1px;" alt="' . ucwords($i) . '">';
+      }
+      $icon .= '<span "';
+      $this->icon = $icon;
 
       if (version_compare(WOOCOMMERCE_VERSION,'2.0.0','>=')) {
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array(&$this,'process_admin_options'));
@@ -84,6 +88,11 @@ function woocommerce_plugnpay_api_cc_init() {
               'title'          => __('Remote Client Password', 'tech'),
               'type'           => 'text',
               'description'    =>  __('Remote Client Password is created within your PlugnPay Security Administration area.', 'tech')),
+          'cards_allowed'   => array(
+             'title'           => __('Card Types Allowed', 'tech'),
+             'type'            => 'text',
+             'description'     => __('Card types your are allowed to accept. Refer to the payment method specifications for possible values.'),
+             'default'         => __('Visa,Mastercard,Amex,Discover', 'tech')),
           'success_message' => array(
               'title'          => __('Transaction Success Message', 'tech'),
               'type'           => 'textarea',
@@ -113,7 +122,16 @@ function woocommerce_plugnpay_api_cc_init() {
               'title'          => __('Giftcard Note:', 'tech'),
               'type'           => 'textarea',
               'description'    => __('This controls the usage note under the giftcard fields, which the user sees during checkout.', 'tech'),
-              'default'        => __('If gift card has an insufficient balance, the remainder will be automatically applied to credit card supplied.', 'tech'))
+              'default'        => __('If gift card has an insufficient balance, the remainder will be automatically applied to credit card supplied.', 'tech')),
+           'divert_currency' => array(
+              'title'          => __('Divert Currency'),
+              'type'           => 'checkbox',
+              'description'    => __('Enable to divert currency to alt account. [Multiple gateway accounts required, each setup for a different currency.]', 'tech'),
+             'default'         => __('no', 'tech')),
+           'divert_accounts'  => array(
+             'title'           => __('Diverted Accounts', 'tech'),
+             'type'            => 'text',
+             'description'     => __('List currency code & username to divert specific payments to. [i.e. USD:username1,BBD:username2,CAD:username3]  Currency codes not listed will use default Gateway Account.')),
        );
     }
 
@@ -139,11 +157,11 @@ function woocommerce_plugnpay_api_cc_init() {
         echo '<label style="margin-right:30px; line-height:40px;">Expiry (MMYY) :</label> <input type="text" style="min-width:55px;" name="pnp_cardexp" size="5" maxlength="4" autocomplete="off" required /><br/>';
         echo '<label style="margin-right:89px; line-height:40px;">CVV :</label> <input type="text" style="min-width:55px;" name="pnp_cardcvv" size="5" maxlength="4" autocomplete="off" required /><br/>';
       }
-      if ($this->giftcard_allow == 'yes') {
-        echo '<div style="font-weight:normal;">&nbsp;<br/>' . wpautop(wptexturize($this->giftcard_descr)) . '</div/>';
+      if ($this->settings['giftcard_allow'] == 'yes') {
+        echo '<div style="font-weight:normal;">&nbsp;<br/>' . wpautop(wptexturize($this->settings['giftcard_descr'])) . '</div/>';
         echo '<label style="margin-right:46px; line-height:40px;">Gift Card :</label> <input type="text" name="pnp_mpgiftcard" size="21" maxlength="20" autocomplete="off" required /><br/>';
         echo '<label style="margin-right:89px; line-height:40px;">CVV :</label> <input type="text" style="min-width:55px;" name="pnp_mpcvv" size="5" maxlength="4" autocomplete="off" required /><br/>';
-        echo '<div style="font-style:italic;">' . wpautop(wptexturize($this->giftcard_note)) . '</div/>';
+        echo '<div style="font-style:italic;">' . wpautop(wptexturize($this->settings['giftcard_note'])) . '</div/>';
       }
     }
 
@@ -163,7 +181,7 @@ function woocommerce_plugnpay_api_cc_init() {
         wc_add_notice(sprintf(__('(Card Verification Number) is not valid.')), 'error');
       }
 
-      if ($this->giftcard_allow == 'yes') {
+      if ($this->settings['giftcard_allow'] == 'yes') {
         $mpgiftcard = preg_replace('/[^0-9]+/', '', $_POST['pnp_mpgiftcard']);
         $mpcvv = preg_replace('/[^0-9]+/', '', $_POST['pnp_mpcvv']);
 
@@ -272,7 +290,7 @@ function woocommerce_plugnpay_api_cc_init() {
           if ($order->status != 'completed') {
             $order->payment_complete($response['orderID']);
             $woocommerce->cart->empty_cart();
-            $order->add_order_note($this->success_message. $response['MErrMsg'] . 'Transaction ID: '. $response['orderID']);
+            $order->add_order_note($this->settings['success_message'] . $response['MErrMsg'] . 'Transaction ID: '. $response['orderID']);
             unset($_SESSION['order_awaiting_payment']);
           }
           return array(
@@ -281,12 +299,12 @@ function woocommerce_plugnpay_api_cc_init() {
           );
         }
         else{
-          $order->add_order_note($this->failed_message . $response['MErrMsg']);
+          $order->add_order_note($this->settings['failed_message'] . $response['MErrMsg']);
           wc_add_notice(sprintf(__('(Transaction Error) '. $response['MErrMsg'])), 'error');
         }
       }
       else {
-        $order->add_order_note($this->failed_message);
+        $order->add_order_note($this->settings['failed_message']);
         $order->update_status('failed');
         wc_add_notice(sprintf(__('(Transaction Error) Error processing payment.')), 'error');
       }
@@ -296,15 +314,31 @@ function woocommerce_plugnpay_api_cc_init() {
     * Generate PlugnPay API CC button link
     **/
     public function generate_plugnpay_api_cc_params($order) {
+
+       $gatewayAccount = $this->settings['gateway_account'];
+       $currencyCode = $order->get_currency();
+
+       if ($this->settings['divert_currency'] == 'yes') {
+         $divert_list = explode(',', $this->settings['divert_accounts']);
+         foreach ($divert_list as $i) {
+           list($altCurrency,$altMerchant) = explode(':', $i, 2);
+           if (strtolower($altCurrency) == strtolower($order->get_currency())) {
+             $gatewayAccount = $altMerchant;
+             $currentCode = $altCurrency;
+             break 1;
+           }
+         }
+       }
+
       $plugnpayapi_args = array(
-        'publisher-name'        => $this->gateway_account,
-        'publisher-password'    => $this->remote_password,
+        'publisher-name'        => strtolower($gatewayAccount),
+        'publisher-password'    => $this->settings['remote_password'],
         'client'                => 'WooCommerce_API_CC',
         'mode'                  => 'auth',
 
         'order-id'              => $order->id,
         'card-amount'           => $order->order_total,
-        'currency'              => $order->currency,
+        'currency'              => strtoupper($currentCode),
 
         'paymethod'             => 'credit',
         'card-number'           => $_POST['pnp_cardnumber'],
@@ -322,7 +356,7 @@ function woocommerce_plugnpay_api_cc_init() {
         'phone'                 => $order->billing_phone,
         'email'                 => $order->billing_email,
 
-        'shipinfo'              => '1',
+        'shipinfo'              => '0',
         'shipname'              => $order->shipping_first_name .' '. $order->shipping_last_name,
         'company'               => $order->shipping_company,
         'address1'              => $order->shipping_address_1,
@@ -336,14 +370,14 @@ function woocommerce_plugnpay_api_cc_init() {
 
       $plugnpayapi_args['ipaddress'] = getUserIP();
       
-      if ($this->post_auth == 'yes') {
+      if ($this->settings['post_auth'] == 'yes') {
         $plugnpayapi_args['authtype'] = 'authpostauth';
       }
       else {
         $plugnpayapi_args['authtype'] = 'authonly';
       }
 
-      if ($this->giftcard_allow == 'yes') {
+      if ($this->settings['giftcard_allow'] == 'yes') {
         $plugnpayapi_args['mpgiftcard'] = $_POST['pnp_mpgiftcard'];
         $plugnpayapi_args['mpcvv'] = $_POST['pnp_mpcvv'];
       }

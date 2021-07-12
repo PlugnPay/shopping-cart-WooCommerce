@@ -1,12 +1,14 @@
 <?php
 /*
-   Plugin Name: PlugnPay SSv1 Payment Gateway For WooCommerce
-   Description: Extends WooCommerce to Process Smart Screens v1 Payments with PlugnPay gateway.
-   Version: 1.1.6
-   Plugin URI: http://www.plugnpay.com
-   Author: PlugnPay
-   Author URI: http://www.plugnpay.com
-   License: Under GPL2
+ * Plugin Name: PlugnPay SSv1 Payment Gateway For WooCommerce
+ * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
+ * Description: Extends WooCommerce to Process Smart Screens v1 Payments with PlugnPay gateway.
+ * Version: 1.1.7
+ * Author: PlugnPay
+ * Author URI: http://www.plugnpay.com
+ * Text Domain: woocommerce_plugnpay_ss1
+ * License: GPL2
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 */
 
 add_action('plugins_loaded', 'woocommerce_tech_autho_init', 0);
@@ -28,17 +30,28 @@ function woocommerce_tech_autho_init() {
       protected $msg = array();
 
       public function __construct() {
-         $this->id               = 'plugnpay';
-         $this->method_title     = __('PlugnPay SSv1', 'tech');
+         $this->id                 = 'plugnpay';
+         $this->method_title       = __('PlugnPay SSv1', 'tech');
          $this->method_description = __('Smart Screens v1 payment method redirects customers to PlugnPay to enter their payment information.', 'tech');
-         $this->icon             = WP_PLUGIN_URL . '/' . plugin_basename(dirname(__FILE__)) . '/images/logo.png';
-         $this->has_fields       = false;
+         $this->icon               = '';
+         $this->icon_path          = WP_PLUGIN_URL . '/' . plugin_basename(dirname(__FILE__)) . '/images/';
+         $this->has_fields         = false;
          $this->init_form_fields();
          $this->init_settings();
-         $this->title            = $this->settings['title'];
-         $this->description      = $this->settings['description'];
-         $this->msg['message']   = '';
-         $this->msg['class']     = '';
+         $this->title              = $this->settings['title'];
+         $this->description        = $this->settings['description'];
+         $this->cards_allowed      = $this->settings['cards_allowed'];
+         $this->msg['message']     = '';
+         $this->msg['class']       = '';
+
+         // shoehorn the cardtype icons into place. Not clean, but works...
+         $icon = WP_PLUGIN_URL . '/' . plugin_basename(dirname(__FILE__)) . '/images/logo.png"><br/>';
+         $cards_list = explode(',', $this->cards_allowed);
+         foreach ($cards_list as $i) {
+           $icon .= '<img src="' . $this->icon_path . strtolower($i) . '.png" style="border:1px #999 solid; margin-left:1px;" alt="' . ucwords($i) . '">';
+         }
+         $icon .= '<span "';
+         $this->icon = $icon;
 
          add_action('init', array(&$this, 'check_plugnpay_response'));
          //update for woocommerce >2.0
@@ -67,12 +80,12 @@ function woocommerce_tech_autho_init() {
              'title'           => __('Title:', 'tech'),
              'type'            => 'text',
              'description'     => __('This controls the title which the user sees during checkout.', 'tech'),
-             'default'         => __('PlugnPay', 'tech')),
+             'default'         => __('Online Payment', 'tech')),
            'description'     => array(
              'title'           => __('Description:', 'tech'),
              'type'            => 'textarea',
              'description'     => __('This controls the description which the user sees during checkout.', 'tech'),
-             'default'         => __('Pay securely payment through PlugnPay Secure Servers.', 'tech')),
+             'default'         => __('Pay securely online through PlugnPay Secure Servers.', 'tech')),
            'gateway_account' => array(
              'title'           => __('Gateway Username', 'tech'),
              'type'            => 'text',
@@ -120,6 +133,15 @@ function woocommerce_tech_autho_init() {
              'options'         => array( '1'=>'publisher-name', '2'=>'publisher-name,card-amount', '3'=>'publisher-name,card-amount,acct_code'),
              'description'     => __('Fieldset to use with authhash validation. [Must configure your PlugnPay account to match]', 'tech'),
              'default'         => __('3', 'tech')),
+           'divert_currency' => array(
+              'title'          => __('Divert Currency'),
+              'type'           => 'checkbox',
+              'description'    => __('Enable to divert currency to alt account. [Multiple gateway accounts required, each setup for a different currency.]', 'tech'),
+              'default'        => __('no', 'tech')),
+           'divert_accounts'  => array(
+             'title'           => __('Diverted Accounts', 'tech'),
+             'type'            => 'text',
+             'description'     => __('List currency code & username to divert specific payments to. [i.e. USD:username1,BBD:username2,CAD:username3]  Currency codes not listed will use default Gateway Account.')),
          );
       }
 
@@ -253,12 +275,27 @@ function woocommerce_tech_autho_init() {
 
          $success_url = get_site_url().'/wc-api/'.get_class($this);
 
+         $gatewayAccount = $this->settings['gateway_account'];
+         $currencyCode = $order->get_currency();
+
+         if ($this->settings['divert_currency'] == 'yes') {
+           $divert_list = explode(',', $this->settings['divert_accounts']);
+           foreach ($divert_list as $i) {
+             list($altCurrency,$altMerchant) = explode(':', $i, 2);
+             if (strtolower($altCurrency) == strtolower($order->get_currency())) {
+               $gatewayAccount = $altMerchant;
+               $currentCode = $altCurrency;
+               break 1;
+             }
+           }
+         }
+
          $plugnpay_args = array(
             'client'                   => 'woocommerce_ss1',
-            'publisher-name'           => $this->settings['gateway_account'],
+            'publisher-name'           => strtolower($gatewayAccount),
             'cards-allowed'            => $this->settings['cards_allowed'],
             'card-amount'              => $order->get_total(),
-            'currency'                 => $order->get_currency(),
+            'currency'                 => strtoupper($currentCode),
             'order-id'                 => $order_id,
             'acct_code'                => $order_id,
             'transitiontype'           => 'hidden',
@@ -362,5 +399,16 @@ function woocommerce_tech_autho_init() {
    }
 
    add_filter('woocommerce_payment_gateways', 'woocommerce_add_tech_autho_gateway');
+}
+
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'plugnpay_ss1_action_links');
+
+function plugnpay_ss1_action_links ($links) {
+  $gateway_links = array(
+    '<a href="http://www.gatewaystatus.com/" target="_blank">Gateway Status</a>',
+    '<a href="https://helpdesk.plugnpay.com/" target="_blank">Online Helpdesk</a>',
+    '<a href="https://pay1.plugnpay.com/admin/" target="_blank">Merchant Admin</a>'
+  );
+  return array_merge($links, $gateway_links);
 }
 

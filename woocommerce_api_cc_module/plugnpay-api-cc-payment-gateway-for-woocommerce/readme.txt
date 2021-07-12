@@ -1,4 +1,4 @@
-=== Plugin Name ===
+﻿=== Plugin Name ===
 PlugnPay API Credit Card Payment Gateway For WooCommerce
 Contributors: PlugnPay
 Site link: http://www.plugnpay.com
@@ -13,43 +13,53 @@ Plugin extends the functionality of WooCommerce to accept payments from credit/d
 
 == Description ==
 
-<h3>PlugnPay API Credit Card Payment Gateway for WooCommerce</h3> makes your website ready to use PlugnPay's API payment method, to accept credit/debit cards on your ecommerce store checkout page.
+PlugnPay API Credit Card Payment Gateway for WooCommerce makes your website ready to use PlugnPay's API payment method, to accept credit/debit cards on your ecommerce store checkout page.
 
 PlugnPay is a widely used payment gateway to process payments online and accepts Visa, MasterCard, Discover and other variants payment options.
 
-<h3>WooCommerce 4.3.x Compatible</h3>
+WooCommerce 4.3.x Compatible
 
 = Features =
 Few features of this plugin:
 
 1. Accept Card right on your website.
-2. No redirecting on other url.
+2. No redirecting to other URL.
 3. Easy to install and configure
 4. Option to configure success & failure message
 5. Safe way to process credit/debit cards on WooCommerce using PlugnPay API
 6. This plugin uses internal card processing, so faster and more reliable.
 7. [Optional] Giftcard split payment ability
+8. [optional] Divert payments based upon currency selected
 
 == Installation ==
-
 Easy steps to install the plugin:
 
-1. Upload `plugnpay-api-cc-payment-gateway-for-woocommerce` folder/directory to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. Go to WooCommerce => Settings
-4. On the 'Settings' page, select 'Payment Gateways' tab.
-5. Under 'Payment Gateways' you will find all the available gateways, select 'PlugnPay API CC' option
-6. On this page you will find option to configure the plugin for use with WooCommerce
-7. Enter the API details (Gateway Username, Remote Client Password)
-8. Configurable elements:
+To install the plugin:
 
-Enable/Disable: Allows payment module's availablity toggling without uninstalling.
+1. Login to your WordPress admin area
+2. Go to Plugins => Add new
+3. Click on the 'Upload Plugin' button
+4. Click on the 'Browse' button & select this payment module's zip file
+5. Click on the 'Install Now' button.
+6. Once installed, click on the 'Activate Button'
+
+To configure this checkout option:
+
+7. Go to WooCommerce => Settings
+8. On the 'Settings' page, select 'Checkout' tab.
+9. Under 'Payment Gateways' you will find all the available gateways, select 'PlugnPay API CC' option
+10. On this page you will find options to configure the plugin for use with WooCommerce
+11. Modify the configurable elements accordingly
+[* NOTE: At minimum, check the Enable checkbox & enter your username into the Gateway Username field.  All other fields are optional.]
+
+---------------------------------------------
+Enable/Disable: Used to enable/disable this payment ability, once the plug-in itself has been activated.
 
 Title: This will appear on checkout page as name for this payment gateway
 
 Description: This will appear on checkout page as description for this payment gateway
 
-Gateway Username: This is the username provided to you by PlugnPay. (Note: This is the same username used to login to the PlugnPay Merchant Administration area.)
+Gateway Account: This is the username provided to you by PlugnPay. (Note: This is the same username used to login to the PlugnPay Merchant Administration area.)
 
 Remote Client Password: This is an API password you explicitly set within your PlugnPay account's Security Administration area. (Note: This is NOT the same password used to login to the PlugnPay Merchant Administration area.)
 
@@ -57,13 +67,21 @@ Transaction Success Message: This message will appear upon successful transactio
 
 Transaction Failed Message: This message will appear when transaction will get failed/declined at payment gateway.
 
-Transaction Settlement: Allows you to speciify if approved transactions should be automatically marked for settlement.
+Transaction Settlement: Allows you to specify if approved transactions should be automatically marked for settlement.
 
 Giftcard Acceptance: Allows you to accept Giftcards at time of checkout & process it as a split-payment. (Note: You must have Giftcard ability enabled in your PlugnPay account to use this.)
 
 Giftcard Description: This is what appears on checkout page as the description for the giftcard option.
 
 Giftcard Note: This is what appears on checkout page below the giftcard fields.
+
+Divert Currency: Use to enable/disable ability to redirect payments to a different gateway account for specific currency types.
+
+Divert Accounts: List currency code & username to divert specific payments to. [i.e. USD:username1,BBD:username2,CAD:username3]  Currency codes not listed will use default Gateway Account.
+---------------------------------------------
+
+12. once completed. click on the 'Save Changes' button to make those adjustments active immediately.
+
 
 == Frequently Asked Questions ==
 = Is SSL Required to use this plugin? =
@@ -75,6 +93,11 @@ No, a merchant must have a giftcard account setup with a supported merchant proc
 == Screenshots ==
 
 == Changelog ==
+= 1.1.4 =
+* Added Divert Currency ability
+* Minor bug fixes & code clean-up
+* Added dynamic cards type display code
+
 = 1.1.3 =
 * Enhanced currency support, to work with multi-currency plug-ins
 * Cleaned up some code & documentation
