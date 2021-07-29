@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay API Credit Card Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process API Credit Card Payments with PlugnPay gateway.
- * Version: 1.1.4
+ * Version: 1.1.5
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_cc
@@ -108,6 +108,22 @@ function woocommerce_plugnpay_api_cc_init() {
               'type'           => 'select',
               'options'        => array('yes'=>'Authorize and Settle', 'no'=>'Authorize Only'),
               'description'    => "Transaction Settlement. If you are not sure what to use set to 'Authorize and Settle'"),
+          'authhash'        => array(
+              'title'          => __('Authorization Hash', 'tech'),
+              'type'           => 'checkbox',
+              'label'          => __('Enable Authorization Verification Hash ability. [MUST configure and match the settings in your PlugnPay account.]', 'tech'),
+              'default'        => 'no'),
+          'authhash_key'    => array(
+             'title'           => __('Authorization Hash Key', 'tech'),
+             'type'            => 'text',
+             'description'     => __('AuthHash Verification Key', 'tech'),
+             'default'         => __('', 'tech')),
+          'authhash_fields' => array(
+             'title'           => __('Authorization Hash Fields', 'tech'),
+             'type'            => 'select',
+             'options'         => array( '1'=>'publisher-name', '2'=>'publisher-name,card-amount', '3'=>'publisher-name,card-amount,acct_code'),
+             'description'     => __('Fieldset to use with authhash validation. [Must configure your PlugnPay account to match]', 'tech'),
+             'default'         => __('3', 'tech')),
           'giftcard_allow'  => array(
               'title'          => __('Giftcard Acceptance', 'tech'),
               'type'           => 'checkbox',
@@ -375,6 +391,24 @@ function woocommerce_plugnpay_api_cc_init() {
       }
       else {
         $plugnpayapi_args['authtype'] = 'authonly';
+      }
+
+      if ($this->settings['authhash'] == 'yes') {
+         $string_fields = ''; 
+         if ($this->settings['authhash_fields'] == '3') {
+            $string_fields = $order_id . $order->get_total() . strtolower($gatewayAccount);
+         }
+         else if ($this->settings['authhash_fields'] == '2') {
+            $string_fields = $order->get_total() . strtolower($gatewayAccount);
+         }
+         else { # $this->settings['authhash_fields'] == '1'
+            $string_fields = strtolower($gatewayAccount);
+         }
+         $timestamp = gmdate("YmdHis", time());
+         $hash_string = $this->settings['authhash_key'] .  $timestamp . $string_fields;
+
+         $plugnpayapi_args['authhash'] = md5($hash_string);
+         $plugnpayapi_args['transacttime'] = $timestamp;
       }
 
       if ($this->settings['giftcard_allow'] == 'yes') {
