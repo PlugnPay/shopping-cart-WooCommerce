@@ -384,7 +384,7 @@ function woocommerce_plugnpay_api_cc_init() {
         'country'               => $order->shipping_country,
       );
 
-      $plugnpayapi_args['ipaddress'] = getUserIP();
+      $plugnpayapi_args['ipaddress'] = plugnpay_cc_getUserIP();
       
       if ($this->settings['post_auth'] == 'yes') {
         $plugnpayapi_args['authtype'] = 'authpostauth';
@@ -442,7 +442,7 @@ function plugnpay_cc_action_links ($links) {
   return array_merge($links, $gateway_links);
 }
 
-function getUserIP() {
+function plugnpay_cc_getUserIP() {
   // Get real visitor IP behind CloudFlare network
   if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
     $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
