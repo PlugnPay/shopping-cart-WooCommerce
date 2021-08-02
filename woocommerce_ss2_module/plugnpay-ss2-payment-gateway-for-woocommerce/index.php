@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay SSv2 Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process Smart Screens v2 Payments with PlugnPay gateway.
- * Version: 1.1.7
+ * Version: 1.1.8
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_ss1
@@ -116,11 +116,10 @@ function woocommerce_tech_autho_init() {
              'default'         => __('no', 'tech'),
              'description'     => "3D Secure Checkout. * Merchant MUST be subscribed to an authorized 3D secure program.  Contact technical support for details."),
            'authhash'        => array(
-             'title'           => __('Authorization Hash'),
-             'type'            => 'select',
-             'options'         => array( 'yes'=>'Enable', 'no'=>'Disable'),
-             'default'         => __('no', 'tech'),
-             'description'     => "Authorization Hash. * Merchant MUST enable & configure the settings to match their PlugnPay account.  Contact technical support for details."),
+              'title'          => __('Authorization Hash', 'tech'),
+              'type'           => 'checkbox',
+              'label'          => __('Enable Authorization Verification Hash ability. [MUST configure and match the settings in your PlugnPay account.]', 'tech'),
+              'default'        => 'no'),
            'authhash_key'    => array(
              'title'           => __('Authorization Hash Key', 'tech'),
              'type'            => 'text',
@@ -132,6 +131,11 @@ function woocommerce_tech_autho_init() {
              'options'         => array( '1'=>'publisher-name', '2'=>'publisher-name,card-amount', '3'=>'publisher-name,card-amount,acct_code'),
              'description'     => __('Fieldset to use with authhash validation. [Must configure your PlugnPay account to match]', 'tech'),
              'default'         => __('3', 'tech')),
+          'giftcard_allow'  => array(
+              'title'          => __('Giftcard Acceptance', 'tech'),
+              'type'           => 'checkbox',
+              'label'          => __('Enable to allow Giftcard Split Payments. [Merchant Processor Giftcard ability required]', 'tech'),
+              'default'        => 'no'),
            'divert_currency' => array(
               'title'          => __('Divert Currency'),
               'type'           => 'checkbox',
@@ -348,6 +352,10 @@ function woocommerce_tech_autho_init() {
 
             $plugnpay_args['pt_transaction_hash'] = md5($hash_string);
             $plugnpay_args['pt_transaction_time'] = $timestamp;
+         }
+
+         if ($this->settings['giftcard_allow'] == 'yes') {
+           $plugnpay_args['pd_transaction_payment_type'] = 'mpgiftcard';
          }
 
          $plugnpay_args_array = array();

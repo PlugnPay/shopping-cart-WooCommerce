@@ -16,7 +16,8 @@ Accept payments on your WooCommerce website with PlugnPay’s secure payment mod
 PlugnPay SSv2 Payment Gateway for WooCommerce makes your website ready to use PlugnPay payment gateway to accept payments on your ecommerce store in a safe way.
 
 PlugnPay is a widely used payment gateway to process payments online and accepts Visa, MasterCard, Discover and other variants payment options.
-Latest WooCommerce v3.9.x & v4.x Compatible
+
+WooCommerce 4.x & 5.x Compatible
 
 = Features =
 Few features of this plugin:
@@ -28,8 +29,9 @@ Few features of this plugin:
 5. A safe way to process credit/debit cards on WooCommerce using PlugnPay's Smart Screens v2 payment method.
 6. Payment data is collected on PlugnPay’s secured servers.
 7. 3D Secure checkout capable for approved merchants
-8. Authorization Verification Hash ability
-9. Divert payments to alternative gateway accounts, based upon currency selected
+8. [Optional] Authorization Verification Hash ability
+9. [Optional] Giftcard split payment ability
+10. [optional] Divert payments based upon currency selected
 
 == Installation ==
 
@@ -76,6 +78,8 @@ Authorization Hash Key: If using this ability, enter the corresponding verificat
 
 Authorization Hash Fields: If using this ability, select a fieldset to validate upon & configure your PlugnPay account to match.
 
+Giftcard Acceptance: Allows you to accept Giftcards at time of checkout & process it as a split-payment. (Note: You must have Giftcard ability enabled in your PlugnPay account to use this.)
+
 Divert Currency: Use to enable/disable ability to redirect payments to a different gateway account for specific currency types.
 
 Divert Accounts: List currency code & username to divert specific payments to. [i.e. USD:username1,BBD:username2,CAD:username3]  Currency codes not listed will use default Gateway Account.
@@ -95,6 +99,9 @@ No, merchants must have a supported 3D secure account pre-configured with us, be
 * None Available
 
 == Changelog ==
+= 1.1.8 =
+* Added optional Giftcard split payment ability
+
 = 1.1.7 =
 * Added Divert Currency ability
 * Minor bug fixes & code clean-up
