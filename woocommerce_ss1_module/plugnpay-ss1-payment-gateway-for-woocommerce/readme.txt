@@ -99,6 +99,10 @@ No, merchants must have a supported 3D secure account pre-configured with us, be
 * None Available
 
 == Changelog ==
+= 1.1.8.1 =
+* Fixed order status update issue
+* Corrected typo in field name passed to gateway
+
 = 1.1.8 =
 * Added optional Giftcard split payment ability
 

@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay SSv1 Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process Smart Screens v1 Payments with PlugnPay gateway.
- * Version: 1.1.8
+ * Version: 1.1.8.1
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_ss1
@@ -205,12 +205,12 @@ function woocommerce_tech_autho_init() {
             $this->msg['class']     = 'error';
             $this->msg['message']   = $this->settings['failed_message'];
             $order                  = new WC_Order($_POST['order-id']);
-            if (($_POST['pi_response_code'] != '') && ($_POST['pi_response_status'] ==  'success')) {
+            if (($_POST['resp-code'] != '') && ($_POST['FinalStatus'] ==  'success')) {
                try{
                   $transauthorised  = false;
 
                   if ($order->get_status() != 'completed') {
-                     if ($_POST['pi_response_status'] == 'success') {
+                     if ($_POST['FinalStatus'] == 'success') {
                         $transauthorised        = true;
                         $this->msg['message']   = $this->settings['success_message'];
                         $this->msg['class']     = 'success';
@@ -307,7 +307,7 @@ function woocommerce_tech_autho_init() {
             'showcompany'              => 'yes',
             'card-name'                => $order->get_billing_first_name() . ' '. $order->get_billing_last_name(),
             'card-company'             => $order->get_billing_company(),
-            'card_address1'            => $order->get_billing_address_1(),
+            'card-address1'            => $order->get_billing_address_1(),
             'card-address2'            => $order->get_billing_address_2(),
             'card-country'             => $order->get_billing_country(),
             'card-state'               => $order->get_billing_state(),
