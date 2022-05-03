@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay SSv2 Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process Smart Screens v2 Payments with PlugnPay gateway.
- * Version: 1.1.8
+ * Version: 1.1.8.1
  * Author: PlugnPay
  * Author URI: http://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_ss1
@@ -298,7 +298,7 @@ function woocommerce_tech_autho_init() {
             'pt_gateway_account'       => strtolower($gatewayAccount),
             'pb_cards_allowed'         => $this->settings['cards_allowed'],
             'pt_transaction_amount'    => $order->get_total(),
-            'pt_currency'              => strtoupper($currentCode),
+            'pt_currency'              => strtoupper($currencyCode),
             'pt_order_classifier'      => $order_id,
             'pt_account_code_1'        => $order_id,
             'pb_transition_type'       => 'hidden',

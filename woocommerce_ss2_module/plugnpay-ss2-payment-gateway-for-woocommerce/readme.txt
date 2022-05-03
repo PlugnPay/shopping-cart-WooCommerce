@@ -99,6 +99,9 @@ No, merchants must have a supported 3D secure account pre-configured with us, be
 * None Available
 
 == Changelog ==
+= 1.1.8.1 =
+* Fixed currency code sending bug
+
 = 1.1.8 =
 * Added optional Giftcard split payment ability
 
