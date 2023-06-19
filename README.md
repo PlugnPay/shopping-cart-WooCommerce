@@ -25,6 +25,9 @@ However the basic process is:
 
 ## Usage
 
+The modules are for 1-time authorizations, where payment data is collected at time of checkout.
+They DO NOT support WooCommerce's subscription and tokenization features at this time.
+
 Here is a break down of what each payment module offers/does:
 
 API
