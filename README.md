@@ -23,6 +23,16 @@ However the basic process is:
 * activate the module in the WordPress Extensions section
 * configure the module in the WooCommerce Settings Payments section
 
+:warning: Protect Your Site From Carding Attacks :warning:
+
+WooCommerce is a very popular shopping cart and is subject to carding attacks by bad actors.
+Always use fraud protection/detection add-ons with WooCommerce, to pre-filter/block fraudlent transaction activity.
+
+We also HIGHLY recommend you:
+* apply CAPTCHA or Two-factor authentication to your checkout process, BEFORE customer is able to make each payment.
+* enable PlugnPay's Authentication Hash Verification ability within your cart, to restrict authorizations to only those that originate from your cart.
+Contact PlugnPay support, if you need more info on either of these recommendations.
+
 ## Usage
 
 The modules are for 1-time authorizations, where payment data is collected at time of checkout.
