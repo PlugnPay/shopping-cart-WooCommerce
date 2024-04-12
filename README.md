@@ -31,6 +31,7 @@ Always use fraud protection/detection add-ons with WooCommerce, to pre-filter/bl
 We also HIGHLY recommend you:
 * apply CAPTCHA or Two-factor authentication to your checkout process, BEFORE customer is able to make each payment.
 * enable PlugnPay's Authentication Hash Verification ability within your cart, to restrict authorizations to only those that originate from your cart.
+
 Contact PlugnPay support, if you need more info on either of these recommendations.
 
 ## Usage
