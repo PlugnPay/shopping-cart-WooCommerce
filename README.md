@@ -81,3 +81,14 @@ Smart Screens v1 (Legacy)
 * Authorization Verification Hash ability
 * Divert payments to alternative gateway accounts, based upon currency selected
 
+## WooCommerce Blocks Compatibility
+
+With WooCommerce v8.3+, Cart and Checkout Blocks are now used by default for installations and themes.
+
+Presently our offered WooCommerce payment modules do not support this newer single page checkout process.  We hope to offer this in a future release of our modules.
+
+If you're having issues with the cart’s checkout, ensure you disable the new WooCommerce Blocks option, to make the cart use the original multi-page checkout process.
+
+Refer to the below URL for how you would make this adjustment:
+[WooCommerce Documentation - Cart and Checkout Blocks](https://woocommerce.com/document/cart-checkout-blocks-status/)
+
