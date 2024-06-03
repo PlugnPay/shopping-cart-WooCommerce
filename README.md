@@ -90,5 +90,6 @@ Presently our offered WooCommerce payment modules do not support this newer sing
 If you're having issues with the cart’s checkout, ensure you disable the new WooCommerce Blocks option, to make the cart use the original multi-page checkout process.
 
 Refer to the below URL for how you would make this adjustment:
+
 [WooCommerce Documentation - Cart and Checkout Blocks](https://woocommerce.com/document/cart-checkout-blocks-status/)
 
