@@ -59,7 +59,6 @@ Smart Screens v2
 * Our payment gateway directly collects payment data via our secure billing pages.
 * After payment is submitted & approved, we direct customer back to WooCommerce.
 * This module DOES NOT require site to be SSL secured, but is HIGHLY recommended.
-* 3D Secure checkout capable for approved merchants
 * Authorization Verification Hash ability
 * Divert payments to alternative gateway accounts, based upon currency selected
 
@@ -77,7 +76,6 @@ Smart Screens v1 (Legacy)
 * Our payment gateway will collect the payment data via our secure billing pages.
 * After payment is submitted & approved, we redirect customer back to WooCommerce.
 * This module DOES NOT require site to be SSL secured, but is HIGHLY recommended.
-* 3D Secure checkout capable for approved merchants
 * Authorization Verification Hash ability
 * Divert payments to alternative gateway accounts, based upon currency selected
 
