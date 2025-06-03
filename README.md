@@ -4,13 +4,11 @@ Easy to install payment modules for the WooCommerce shopping cart.
 Multiple payment styles are supported, each covering a different checkout need.
 
 * API (Remote Auth)
-  - [Download - Credit Card](./woocommerce_api_cc_module.zip) v1.1.6
+  - [Download - Credit Card](./woocommerce_api_cc_module.zip) v1.1.7
   - [Download - ACH/eCheck](./woocommerce_api_ach_module.zip) v1.1.6
   - [Download - Gift Card](./woocommerce_api_gitcard_module.zip) v1.1.2
 * Smart Screens v2 (Gateway Hosted Solution)
-  - [Download](./woocommerce_ss2_module.zip) v1.1.8.3
-* Smart Screens v1 (Legacy Gateway Hosted Solution)
-  - [Download](./woocommerce_ss1_module.zip) v1.1.8.3
+  - [Download](./woocommerce_ss2_module.zip) v1.1.8.4
   
 ## Installation
 
@@ -65,19 +63,6 @@ Smart Screens v2
 Smart Screens v2 (CardX Build)
 * This is a modified version of Smart Screens v2, but for CardX specific clients.
 * If you’re a CardX client, use this WooCommerce module instead of our generic one.
-
-Smart Screens v1 (Legacy)
-* TO PREVENT ISSUES, DO NOT USE THIS MODULE, UNLESS TOLD TO BY PLUGNPAY STAFF!
-* USE THE SMART SCREENS V2 MODULE INSTEAD FOR BEST RESULTS.
-* This legacy version of Smart Screens payment method for older PnP accounts.
-* Supports Credit Cards, ACH/eCheck & other payment options configured with us.
-* WooCommerce will NOT collect sensitive payment info from customer at checkout.
-* Customer is redirected to our gateway's secure billing pages to complete payment.
-* Our payment gateway will collect the payment data via our secure billing pages.
-* After payment is submitted & approved, we redirect customer back to WooCommerce.
-* This module DOES NOT require site to be SSL secured, but is HIGHLY recommended.
-* Authorization Verification Hash ability
-* Divert payments to alternative gateway accounts, based upon currency selected
 
 ## WooCommerce Blocks Compatibility
 
