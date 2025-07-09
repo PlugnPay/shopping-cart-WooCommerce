@@ -4,7 +4,7 @@ Easy to install payment modules for the WooCommerce shopping cart.
 Multiple payment styles are supported, each covering a different checkout need.
 
 * API (Remote Auth)
-  - [Download - Credit Card](./woocommerce_api_cc_module.zip) v1.1.7
+  - [Download - Credit Card](./woocommerce_api_cc_module.zip) v1.1.8
   - [Download - ACH/eCheck](./woocommerce_api_ach_module.zip) v1.1.6
   - [Download - Gift Card](./woocommerce_api_gitcard_module.zip) v1.1.2
 * Smart Screens v2 (Gateway Hosted Solution)
