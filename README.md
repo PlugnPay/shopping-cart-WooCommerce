@@ -5,7 +5,7 @@ Multiple payment styles are supported, each covering a different checkout need.
 
 * API (Remote Auth)
   - [Download - Credit Card](./woocommerce_api_cc_module.zip) v1.1.9
-  - [Download - ACH/eCheck](./woocommerce_api_ach_module.zip) v1.1.6
+  - [Download - ACH/eCheck](./woocommerce_api_ach_module.zip) v1.1.8
   - [Download - Gift Card](./woocommerce_api_gitcard_module.zip) v1.1.2
 * Smart Screens v2 (Gateway Hosted Solution)
   - [Download](./woocommerce_ss2_module.zip) v1.1.8.4
