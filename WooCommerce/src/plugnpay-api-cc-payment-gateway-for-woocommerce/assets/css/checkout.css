@@ -1,0 +1,185 @@
+.plugnpay-cc-description {
+  margin: 0 0 1em;
+  color: #50575e;
+  font-size: 0.925em;
+  line-height: 1.5;
+}
+
+.plugnpay-cc-description p:last-child {
+  margin-bottom: 0;
+}
+
+.plugnpay-cc-fields {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.plugnpay-cc-fields .form-row {
+  margin: 0 0 0.85em;
+  padding: 0;
+}
+
+.plugnpay-cc-fields .form-row:last-child {
+  margin-bottom: 0;
+}
+
+.plugnpay-cc-fields label {
+  display: block;
+  margin-bottom: 0.35em;
+  font-size: 0.875em;
+  font-weight: 500;
+  line-height: 1.4;
+  color: inherit;
+}
+
+.plugnpay-cc-fields .input-text {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.65em 0.75em;
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 1em;
+  line-height: 1.4;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.plugnpay-cc-fields .input-text:focus {
+  border-color: #2271b1;
+  box-shadow: 0 0 0 1px #2271b1;
+  outline: none;
+}
+
+.plugnpay-cc-fields .plugnpay-cc-field-invalid {
+  border-color: #cc1818;
+  box-shadow: 0 0 0 1px #cc1818;
+}
+
+.plugnpay-cc-fields select.input-text {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #50575e 50%), linear-gradient(135deg, #50575e 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% + 1px), calc(100% - 11px) calc(50% + 1px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2em;
+}
+
+.plugnpay-cc-expiry-fields {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 0.65em;
+  width: 100%;
+}
+
+.plugnpay-cc-expiry-field {
+  display: flex;
+  flex: 1 1 50%;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.plugnpay-cc-expiry-field label {
+  margin-bottom: 0.35em;
+}
+
+.plugnpay-cc-expiry-fields select.input-text,
+.plugnpay-cc-expiry-field select.input-text {
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+.plugnpay-cc-fields .form-row-first,
+.plugnpay-cc-fields .form-row-last {
+  width: 48%;
+}
+
+.plugnpay-cc-giftcard {
+  margin-top: 1.25em;
+  padding-top: 1.25em;
+  border-top: 1px solid #e0e0e0;
+}
+
+.plugnpay-cc-giftcard-heading {
+  margin: 0 0 0.85em;
+  font-size: 0.875em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #50575e;
+}
+
+.plugnpay-cc-giftcard-heading p:last-child {
+  margin-bottom: 0;
+}
+
+.plugnpay-cc-giftcard-note {
+  margin: 0.75em 0 0;
+  font-size: 0.8125em;
+  line-height: 1.5;
+  color: #646970;
+}
+
+.plugnpay-cc-giftcard-note p:last-child {
+  margin-bottom: 0;
+}
+
+.plugnpay-cc-giftcard-row {
+  margin-bottom: 0;
+}
+
+.plugnpay-cc-giftcard-fields {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 0.65em;
+  width: 100%;
+}
+
+.plugnpay-cc-giftcard-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.plugnpay-cc-giftcard-field-number {
+  flex: 2 1 66%;
+}
+
+.plugnpay-cc-giftcard-field-cvv {
+  flex: 1 1 34%;
+}
+
+.plugnpay-cc-giftcard-field label {
+  margin-bottom: 0.35em;
+}
+
+.plugnpay-cc-giftcard-field .input-text {
+  width: 100%;
+}
+
+.plugnpay-cc-card-icons img {
+  height: 22px;
+  width: auto;
+  margin: 0 0 0 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.plugnpay-cc-card-icons img:first-child {
+  margin-left: 0;
+}
+
+@media (max-width: 480px) {
+  .plugnpay-cc-fields .form-row-first,
+  .plugnpay-cc-fields .form-row-last {
+    width: 100%;
+    float: none;
+  }
+}

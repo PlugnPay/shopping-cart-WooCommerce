@@ -1,0 +1,43 @@
+====================================================
+PlugnPay API ACH/eCheck Module
+Payment Module for WooCommerce — module v1.1.9
+====================================================
+
+***** IMPORTANT NOTES *****
+This module is provided "AS IS". Limited technical support assistance
+will be given to help diagnose/address problems with this module.
+
+This module requires SSL and PHP cURL. WooCommerce collects ACH/eCheck
+information on your store's checkout pages. Authorization is performed
+via PlugnPay's Remote API.
+
+PCI / compliance: Collecting bank account data onsite increases your
+compliance scope. For hosted checkout, use PlugnPay Smart Screens v2
+(see INSTALL_SS2.txt).
+
+These modules do not support WooCommerce Cart/Checkout Blocks yet.
+Use classic checkout if Blocks causes problems.
+***************************
+
+To Install:
+
+1. Preferred: In WordPress → Plugins → Add New → Upload Plugin,
+   upload woocommerce_api_ach_module.zip.
+
+   Or unzip into wp-content/plugins/ so you have:
+     wp-content/plugins/plugnpay-api-ach-payment-gateway-for-woocommerce/...
+
+   From this repo's development tree that is:
+     WooCommerce/src/plugnpay-api-ach-payment-gateway-for-woocommerce/
+       → <shop>/wp-content/plugins/plugnpay-api-ach-payment-gateway-for-woocommerce/
+
+2. Activate "PlugnPay API ACH/eCheck Payment Gateway For WooCommerce".
+
+3. WooCommerce → Settings → Payments → enable and configure
+   Gateway Account, Remote Client Password, and other options.
+
+See the package overview:
+  WooCommerce/README.md
+
+Source tree (development):
+  src/plugnpay-api-ach-payment-gateway-for-woocommerce/

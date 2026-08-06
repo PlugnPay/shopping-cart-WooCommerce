@@ -1,0 +1,43 @@
+====================================================
+PlugnPay Smart Screens v2 Module
+Payment Module for WooCommerce — module v1.1.8.5
+====================================================
+
+***** IMPORTANT NOTES *****
+This module is provided "AS IS". Limited technical support assistance
+will be given to help diagnose/address problems with this module.
+
+This module redirects customers to PlugnPay hosted Smart Screens
+(https://pay1.plugnpay.com/pay/). WooCommerce does not collect
+sensitive payment data at checkout. HTTPS on your store is strongly
+recommended for return URL / session handling.
+
+Capture, void, and refund (when needed) are typically performed in
+PlugnPay Merchant Admin.
+
+These modules do not support WooCommerce Cart/Checkout Blocks yet.
+Use classic checkout if Blocks causes problems.
+***************************
+
+To Install:
+
+1. Preferred: In WordPress → Plugins → Add New → Upload Plugin,
+   upload woocommerce_ss2_module.zip.
+
+   Or unzip into wp-content/plugins/ so you have:
+     wp-content/plugins/plugnpay-ss2-payment-gateway-for-woocommerce/...
+
+   From this repo's development tree that is:
+     WooCommerce/src/plugnpay-ss2-payment-gateway-for-woocommerce/
+       → <shop>/wp-content/plugins/plugnpay-ss2-payment-gateway-for-woocommerce/
+
+2. Activate "PlugnPay SSv2 Payment Gateway For WooCommerce".
+
+3. WooCommerce → Settings → Payments → enable and configure
+   Gateway Account and other options (including Auth Hash if used).
+
+See the package overview:
+  WooCommerce/README.md
+
+Source tree (development):
+  src/plugnpay-ss2-payment-gateway-for-woocommerce/

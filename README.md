@@ -1,78 +1,70 @@
-﻿# Shopping Cart - WooCommerce Payment Modules
+﻿# shopping-cart-WooCommerce
 
-Easy to install payment modules for the WooCommerce shopping cart.
-Multiple payment styles are supported, each covering a different checkout need.
+PlugnPay payment modules for WooCommerce.
 
-* API (Remote Auth)
-  - [Download - Credit Card](./woocommerce_api_cc_module.zip) v1.1.9
-  - [Download - ACH/eCheck](./woocommerce_api_ach_module.zip) v1.1.9
-  - [Download - Gift Card](./woocommerce_api_giftcard_module.zip) v1.1.3
-* Smart Screens v2 (Gateway Hosted Solution)
-  - [Download](./woocommerce_ss2_module.zip) v1.1.8.5
-  
-## Installation
+## Packages
 
-For complete instructions on how to install/setup any of our WooCommerce payment modules, please refer to the README file within the zip file of that module.
+| Package | Method | Status |
+|---|---|---|
+| [WooCommerce](./WooCommerce/) | Remote API (Credit Card + ACH) and Smart Screens v2 | Current |
 
-However the basic process is:
-* download the zip file of the module you want to install
-* unzip it & refer to the README file
-* upload the given file via WordPress Plugin section
-* activate the module in the WordPress Extensions section
-* configure the module in the WooCommerce Settings Payments section
+## Choose a module
 
-:warning: Protect Your Site From Carding Attacks :warning:
+| | API Credit Card | API ACH/eCheck | Smart Screens v2 |
+|---|---|---|---|
+| Download | [woocommerce_api_cc_module.zip](./WooCommerce/woocommerce_api_cc_module.zip) | [woocommerce_api_ach_module.zip](./WooCommerce/woocommerce_api_ach_module.zip) | [woocommerce_ss2_module.zip](./WooCommerce/woocommerce_ss2_module.zip) |
+| Source | [src/…api-cc…](./WooCommerce/src/plugnpay-api-cc-payment-gateway-for-woocommerce/) | [src/…api-ach…](./WooCommerce/src/plugnpay-api-ach-payment-gateway-for-woocommerce/) | [src/…ss2…](./WooCommerce/src/plugnpay-ss2-payment-gateway-for-woocommerce/) |
+| Version | v1.1.9 | v1.1.9 | v1.1.8.5 |
+| Checkout | Onsite card fields | Onsite ACH fields | Redirect → `https://pay1.plugnpay.com/pay/` |
+| Card/bank data on your server | Yes | Yes | No |
+| PCI scope | Higher | Higher | Lower |
 
-WooCommerce is a very popular shopping cart and is subject to carding attacks by bad actors.
-Always use fraud protection/detection add-ons with WooCommerce, to pre-filter/block fraudlent transaction activity.
+Docs and install:
 
-We also HIGHLY recommend you:
-* apply CAPTCHA or Two-factor authentication to your checkout process, BEFORE customer is able to make each payment.
-* enable PlugnPay's Authentication Hash Verification ability within your cart, to restrict authorizations to only those that originate from your cart.
+- [WooCommerce/README.md](./WooCommerce/README.md)
+- API CC: [INSTALL.txt](./WooCommerce/INSTALL.txt)
+- API ACH: [INSTALL_ACH.txt](./WooCommerce/INSTALL_ACH.txt)
+- SS2: [INSTALL_SS2.txt](./WooCommerce/INSTALL_SS2.txt)
 
-Contact PlugnPay support, if you need more info on either of these recommendations.
+## Installation (summary)
+
+1. Download the zip for the module you want.
+2. In WordPress → Plugins → Add New → Upload Plugin, upload the zip (or copy the plugin folder from `WooCommerce/src/` into `wp-content/plugins/`).
+3. Activate the plugin.
+4. Configure under WooCommerce → Settings → Payments.
 
 ## Usage
 
-The modules are for 1-time authorizations, where payment data is collected at time of checkout.
-They DO NOT support WooCommerce's subscription and tokenization features at this time.
+The modules are for one-time authorizations where payment data is collected at checkout.
+They do **not** support WooCommerce subscriptions or tokenization at this time.
 
-Here is a break down of what each payment module offers/does:
+### API (Remote Auth)
 
-API
-* This method permits WooCommerce to handle the entire checkout process.
-* We offer separate API based modules for Credit Card & ACH/eCheck options.
-* This module directly requires WooCommerce to collect all payment information.
-* Customer never leaves the given site during the checkout process.
-* Customer never sees our payment gateway during the checkout process.
-* This module requires the given website to be properly SSL secured.
-* Authorization Verification Hash ability
-* Divert payments to alternative gateway accounts, based upon currency selected
+- WooCommerce handles the full checkout on your site.
+- Separate modules for Credit Card and ACH/eCheck.
+- Customer never leaves your site or sees the PlugnPay billing pages.
+- Storefront HTTPS is required.
+- Authorization Verification Hash and currency divert options available.
 
-Smart Screens v2
-* This is the most current version of our Smart Screens payment method.
-* Supports Credit Card, ACH/eCheck & other payment options configured with us.
-* WooCommerce will NOT collect sensitive payment info from customer at checkout.
-* Customer is redirected to our gateway's secure billing pages to complete payment.
-* Our payment gateway directly collects payment data via our secure billing pages.
-* After payment is submitted & approved, we direct customer back to WooCommerce.
-* This module DOES NOT require site to be SSL secured, but is HIGHLY recommended.
-* Authorization Verification Hash ability
-* Divert payments to alternative gateway accounts, based upon currency selected
+### Smart Screens v2
 
-Smart Screens v2 (CardX Build)
-* This is a modified version of Smart Screens v2, but for CardX specific clients.
-* If you’re a CardX client, use this WooCommerce module instead of our generic one.
+- Hosted checkout at PlugnPay Smart Screens.
+- Supports Credit Card, ACH/eCheck, and other options configured on your PlugnPay account.
+- WooCommerce does **not** collect sensitive payment data at checkout.
+- Customer is redirected to PlugnPay, then returned after approval or decline.
+- HTTPS on your store is strongly recommended.
+- Authorization Verification Hash and currency divert options available.
 
 ## WooCommerce Blocks Compatibility
 
-With WooCommerce v8.3+, Cart and Checkout Blocks are now used by default for installations and themes.
+With WooCommerce v8.3+, Cart and Checkout Blocks are the default for many installs.
 
-Presently our offered WooCommerce payment modules do not support this newer single page checkout process.  We hope to offer this in a future release of our modules.
+These modules do not support Blocks checkout yet. If checkout fails, disable Cart/Checkout Blocks and use classic checkout.
 
-If you're having issues with the cart’s checkout, ensure you disable the new WooCommerce Blocks option, to make the cart use the original multi-page checkout process.
+[WooCommerce Documentation — Cart and Checkout Blocks](https://woocommerce.com/document/cart-checkout-blocks-status/)
 
-Refer to the below URL for how you would make this adjustment:
+## Security
 
-[WooCommerce Documentation - Cart and Checkout Blocks](https://woocommerce.com/document/cart-checkout-blocks-status/)
+WooCommerce is a common target for carding attacks. Use fraud protection add-ons, CAPTCHA or 2FA before payment, and enable PlugnPay Authentication Hash Verification when possible.
 
+Contact PlugnPay support if you need help with these recommendations.
