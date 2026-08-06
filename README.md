@@ -10,14 +10,38 @@ PlugnPay payment modules for WooCommerce.
 
 ## Choose a module
 
-| | API Credit Card | API ACH/eCheck | Smart Screens v2 |
-|---|---|---|---|
-| Download | [woocommerce_api_cc_module.zip](./WooCommerce/woocommerce_api_cc_module.zip) | [woocommerce_api_ach_module.zip](./WooCommerce/woocommerce_api_ach_module.zip) | [woocommerce_ss2_module.zip](./WooCommerce/woocommerce_ss2_module.zip) |
-| Source | [src/…api-cc…](./WooCommerce/src/plugnpay-api-cc-payment-gateway-for-woocommerce/) | [src/…api-ach…](./WooCommerce/src/plugnpay-api-ach-payment-gateway-for-woocommerce/) | [src/…ss2…](./WooCommerce/src/plugnpay-ss2-payment-gateway-for-woocommerce/) |
-| Version | v1.1.9 | v1.1.9 | v1.1.8.5 |
-| Checkout | Onsite card fields | Onsite ACH fields | Redirect → `https://pay1.plugnpay.com/pay/` |
-| Card/bank data on your server | Yes | Yes | No |
-| PCI scope | Higher | Higher | Lower |
+### API Credit Card
+
+| | |
+|---|---|
+| Download | [woocommerce_api_cc_module.zip](./WooCommerce/woocommerce_api_cc_module.zip) |
+| Source | [src/plugnpay-api-cc-…](./WooCommerce/src/plugnpay-api-cc-payment-gateway-for-woocommerce/) |
+| Version | v1.1.9 |
+| Checkout | Onsite card fields |
+| Card/bank data on your server | Yes |
+| PCI scope | Higher |
+
+### API ACH/eCheck
+
+| | |
+|---|---|
+| Download | [woocommerce_api_ach_module.zip](./WooCommerce/woocommerce_api_ach_module.zip) |
+| Source | [src/plugnpay-api-ach-…](./WooCommerce/src/plugnpay-api-ach-payment-gateway-for-woocommerce/) |
+| Version | v1.1.9 |
+| Checkout | Onsite ACH fields |
+| Card/bank data on your server | Yes |
+| PCI scope | Higher |
+
+### Smart Screens v2
+
+| | |
+|---|---|
+| Download | [woocommerce_ss2_module.zip](./WooCommerce/woocommerce_ss2_module.zip) |
+| Source | [src/plugnpay-ss2-…](./WooCommerce/src/plugnpay-ss2-payment-gateway-for-woocommerce/) |
+| Version | v1.1.8.5 |
+| Checkout | Redirect → `https://pay1.plugnpay.com/pay/` |
+| Card/bank data on your server | No |
+| PCI scope | Lower |
 
 Docs and install:
 

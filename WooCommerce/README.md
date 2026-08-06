@@ -6,14 +6,38 @@ Install through WordPress → Plugins → Upload Plugin, then configure under Wo
 
 ## Choose a module
 
-| | API Credit Card | API ACH/eCheck | Smart Screens v2 |
-|---|---|---|---|
-| Package folder | `plugnpay-api-cc-payment-gateway-for-woocommerce` | `plugnpay-api-ach-payment-gateway-for-woocommerce` | `plugnpay-ss2-payment-gateway-for-woocommerce` |
-| Download | [woocommerce_api_cc_module.zip](./woocommerce_api_cc_module.zip) | [woocommerce_api_ach_module.zip](./woocommerce_api_ach_module.zip) | [woocommerce_ss2_module.zip](./woocommerce_ss2_module.zip) |
-| Checkout | Onsite card fields → Remote API | Onsite ACH fields → Remote API | Redirect → `https://pay1.plugnpay.com/pay/` |
-| Card/bank data on your server | Yes | Yes | No |
-| PCI scope | Higher | Higher | Lower |
-| Public demo account | No — merchant credentials only | No — merchant credentials only | No — merchant credentials only |
+### API Credit Card
+
+| | |
+|---|---|
+| Package folder | `plugnpay-api-cc-payment-gateway-for-woocommerce` |
+| Download | [woocommerce_api_cc_module.zip](./woocommerce_api_cc_module.zip) |
+| Checkout | Onsite card fields → Remote API |
+| Card/bank data on your server | Yes |
+| PCI scope | Higher |
+| Public demo account | No — merchant credentials only |
+
+### API ACH/eCheck
+
+| | |
+|---|---|
+| Package folder | `plugnpay-api-ach-payment-gateway-for-woocommerce` |
+| Download | [woocommerce_api_ach_module.zip](./woocommerce_api_ach_module.zip) |
+| Checkout | Onsite ACH fields → Remote API |
+| Card/bank data on your server | Yes |
+| PCI scope | Higher |
+| Public demo account | No — merchant credentials only |
+
+### Smart Screens v2
+
+| | |
+|---|---|
+| Package folder | `plugnpay-ss2-payment-gateway-for-woocommerce` |
+| Download | [woocommerce_ss2_module.zip](./woocommerce_ss2_module.zip) |
+| Checkout | Redirect → `https://pay1.plugnpay.com/pay/` |
+| Card/bank data on your server | No |
+| PCI scope | Lower |
+| Public demo account | No — merchant credentials only |
 
 You may install more than one module; enable only the payment method(s) you need under WooCommerce → Settings → Payments.
 
