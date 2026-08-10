@@ -1,0 +1,87 @@
+====================================================
+PlugnPay API CC Tokenization Module
+Payment Module for WooCommerce — module v1.0.3
+====================================================
+
+***** IMPORTANT NOTES *****
+This module is provided "AS IS". Limited technical support assistance
+will be given to help diagnose/address problems with this module.
+
+This module requires SSL and PHP cURL. WooCommerce collects credit card
+information on your store's checkout pages for new-card payments.
+Saved cards are charged via PlugnPay Remote API authprev (card-on-file).
+
+Tokens are bound to the PlugnPay gateway account that created them.
+With Divert Currency enabled, a card saved on account A cannot be used
+when the order routes to account B — the customer must register the
+card separately on each account.
+
+Token lifetime: prevorderid must stay within 24 months, and the card
+must not be past its expiration date. Successful charges refresh
+prevorderid; origorderid never changes.
+
+Checkout — new card (optional save):
+  mode=auth
+  When the customer checks "save payment method":
+    transflags=init,cit,recurring
+  On success, a WC payment token is stored (origorderid = prevorderid
+  = gateway orderID for that account).
+
+Checkout — saved card:
+  mode=authprev
+  origorderid (immutable), prevorderid (rotated on success), currency
+  transflags=cit,recurring
+  Optional Saved Card CVV setting sends card-cvv when enabled.
+
+Optional setting — Saved Card CVV:
+  When enabled, customers must enter the card security code when paying
+  with a saved card. That value is sent as card-cvv with the authprev
+  request. Default is disabled (no CVV prompt for saved cards).
+
+My Account → Add payment method:
+  Shows the same new-card fields as checkout (no saved-card picker).
+  Registers the card with a $0.00 auth using transflags:
+    init,cit,recurring,avsonly
+  On FinalStatus success/pending, saves a WooCommerce payment token
+  bound to the resolved PlugnPay account (origorderid = that orderID).
+
+  REQUIREMENT: The PlugnPay gateway account must be configured to allow
+  AVS-only transactions. Without AVS-only enabled on the account, Add
+  payment method registration will fail. Contact PlugnPay support if
+  you need AVS-only enabled.
+
+Also ensure Remote Client Password is set and the store server IP is
+allowed in PlugnPay Security Administration (same as other API modules).
+
+This module does NOT require WooCommerce Subscriptions.
+
+These modules do not support WooCommerce Cart/Checkout Blocks yet.
+Use classic checkout if Blocks causes problems.
+***************************
+
+To Install:
+
+1. Preferred: In WordPress → Plugins → Add New → Upload Plugin,
+   upload woocommerce_api_cc_tokenization_module.zip.
+
+   Or unzip into wp-content/plugins/ so you have:
+     wp-content/plugins/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/...
+
+   From this repo's development tree that is:
+     WooCommerce/src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/
+       → <shop>/wp-content/plugins/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/
+
+2. Activate "PlugnPay API CC Tokenization Payment Gateway For WooCommerce".
+
+3. WooCommerce → Settings → Payments → enable and configure
+   Gateway Account, Remote Client Password, and other options.
+
+   Configurable elements of note:
+   - Saved Card CVV: optionally require CVV for token-based checkouts
+   - Divert Currency: tokens remain bound to the account that created them
+
+4. Confirm the PlugnPay account allows AVS-only if customers will use
+   My Account → Add payment method.
+
+See the package base overview:
+  WooCommerce/README.md

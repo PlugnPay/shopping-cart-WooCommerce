@@ -6,7 +6,7 @@ PlugnPay payment modules for WooCommerce.
 
 | Package | Method | Status |
 |---|---|---|
-| [WooCommerce](./WooCommerce/) | Remote API (Credit Card + ACH) and Smart Screens v2 | Current |
+| [WooCommerce](./WooCommerce/) | Remote API (Credit Card + ACH + Tokenization) and Smart Screens v2 | Current |
 
 ## Choose a module
 
@@ -32,6 +32,17 @@ PlugnPay payment modules for WooCommerce.
 | Card/bank data on your server | Yes |
 | PCI scope | Higher |
 
+### API Credit Card Tokenization (card on file)
+
+| | |
+|---|---|
+| Download | [woocommerce_api_cc_tokenization_module.zip](./WooCommerce/woocommerce_api_cc_tokenization_module.zip) |
+| Source | [src/plugnpay-api-cc-tokenization-…](./WooCommerce/src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/) |
+| Version | v1.0.3 |
+| Checkout | Onsite card fields + saved cards |
+| Card/bank data on your server | Yes (new card); saved cards use authprev |
+| PCI scope | Higher |
+
 ### Smart Screens v2
 
 | | |
@@ -48,6 +59,7 @@ Docs and install:
 - [WooCommerce/README.md](./WooCommerce/README.md)
 - API CC: [INSTALL.txt](./WooCommerce/INSTALL.txt)
 - API ACH: [INSTALL_ACH.txt](./WooCommerce/INSTALL_ACH.txt)
+- API CC Tokenization: [INSTALL_TOKENIZATION.txt](./WooCommerce/INSTALL_TOKENIZATION.txt)
 - SS2: [INSTALL_SS2.txt](./WooCommerce/INSTALL_SS2.txt)
 
 ## Installation (summary)
@@ -59,13 +71,22 @@ Docs and install:
 
 ## Usage
 
-The modules are for one-time authorizations where payment data is collected at checkout.
-They do **not** support WooCommerce subscriptions or tokenization at this time.
+Most modules are for one-time authorizations where payment data is collected at checkout.
+They do **not** support WooCommerce Subscriptions.
+
+The **API Credit Card Tokenization** module adds card-on-file (saved cards) for logged-in customers via PlugnPay `authprev`. It does **not** require WooCommerce Subscriptions.
+
+- Checkout save: new card with `mode=auth` and `transflags=init,cit,recurring`
+- Later charges: `mode=authprev` with immutable `origorderid`, rotating `prevorderid`, and `currency`
+- My Account → Add payment method: `$0.00` auth with `transflags=init,cit,recurring,avsonly` (PnP account **must** allow AVS-only)
+- Tokens are bound to the PlugnPay account that created them and cannot be reused across divert-currency accounts
+- Optional setting can require CVV on saved-card checkouts (`card-cvv` with authprev)
+- Token usable while `prevorderid` is within 24 months and the card is not expired
 
 ### API (Remote Auth)
 
 - WooCommerce handles the full checkout on your site.
-- Separate modules for Credit Card and ACH/eCheck.
+- Separate modules for Credit Card, ACH/eCheck, and Credit Card Tokenization.
 - Customer never leaves your site or sees the PlugnPay billing pages.
 - Storefront HTTPS is required.
 - Authorization Verification Hash and currency divert options available.

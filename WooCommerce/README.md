@@ -1,6 +1,6 @@
 # WooCommerce — PlugnPay Payment Modules
 
-Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.1.9**, API ACH **v1.1.9**, Smart Screens v2 **v1.1.8.5**.
+Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.1.9**, API ACH **v1.1.9**, API CC Tokenization **v1.0.3**, Smart Screens v2 **v1.1.8.5**.
 
 Install through WordPress → Plugins → Upload Plugin, then configure under WooCommerce → Settings → Payments.
 
@@ -25,6 +25,17 @@ Install through WordPress → Plugins → Upload Plugin, then configure under Wo
 | Download | [woocommerce_api_ach_module.zip](./woocommerce_api_ach_module.zip) |
 | Checkout | Onsite ACH fields → Remote API |
 | Card/bank data on your server | Yes |
+| PCI scope | Higher |
+| Public demo account | No — merchant credentials only |
+
+### API Credit Card Tokenization (card on file)
+
+| | |
+|---|---|
+| Package folder | `plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce` |
+| Download | [woocommerce_api_cc_tokenization_module.zip](./woocommerce_api_cc_tokenization_module.zip) |
+| Checkout | Onsite card fields + saved cards → Remote API / authprev |
+| Card/bank data on your server | Yes (new card); saved cards use authprev |
 | PCI scope | Higher |
 | Public demo account | No — merchant credentials only |
 
@@ -55,6 +66,24 @@ Collects card data on your storefront and posts from the server to PlugnPay Remo
 
 Collects ACH/eCheck data on your storefront and posts from the server to PlugnPay Remote API.
 
+## API Credit Card Tokenization (onsite + card on file)
+
+- Source: [src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/](./src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/)
+- Quick install: [INSTALL_TOKENIZATION.txt](./INSTALL_TOKENIZATION.txt)
+- Version: **v1.0.3**
+
+Collects card data on your storefront for new cards. Behavior:
+
+| Flow | Remote API |
+|---|---|
+| Checkout — new card (optional save) | `mode=auth`; when saving, `transflags=init,cit,recurring` |
+| Checkout — saved card | `mode=authprev` with `origorderid`, `prevorderid`, `currency`, `transflags=cit,recurring` (optional `card-cvv`) |
+| My Account — Add payment method | `$0.00` `mode=auth` with `transflags=init,cit,recurring,avsonly`; on success, save WC token |
+
+**PnP account requirement:** AVS-only must be enabled for Add payment method registration to succeed.
+
+Tokens are strictly bound to the PlugnPay account that created them (including when Divert Currency is enabled). Token lifetime: `prevorderid` within 24 months and card not expired. Does not require WooCommerce Subscriptions.
+
 ## Smart Screens v2 (hosted)
 
 - Source: [src/plugnpay-ss2-payment-gateway-for-woocommerce/](./src/plugnpay-ss2-payment-gateway-for-woocommerce/)
@@ -80,14 +109,17 @@ These modules support classic checkout only. See the [root README](../README.md#
 WooCommerce/
   INSTALL.txt                 # API Credit Card quick install
   INSTALL_ACH.txt             # API ACH quick install
+  INSTALL_TOKENIZATION.txt    # API CC Tokenization quick install
   INSTALL_SS2.txt             # Smart Screens v2 quick install
   woocommerce_api_cc_module.zip
   woocommerce_api_ach_module.zip
+  woocommerce_api_cc_tokenization_module.zip
   woocommerce_ss2_module.zip
   README.md
   src/
     plugnpay-api-cc-payment-gateway-for-woocommerce/
     plugnpay-api-ach-payment-gateway-for-woocommerce/
+    plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/
     plugnpay-ss2-payment-gateway-for-woocommerce/
 ```
 
@@ -96,5 +128,6 @@ Rebuild a merchant zip from source (run from `WooCommerce/src/`):
 ```bash
 zip -r ../woocommerce_api_cc_module.zip plugnpay-api-cc-payment-gateway-for-woocommerce
 zip -r ../woocommerce_api_ach_module.zip plugnpay-api-ach-payment-gateway-for-woocommerce
+zip -r ../woocommerce_api_cc_tokenization_module.zip plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce
 zip -r ../woocommerce_ss2_module.zip plugnpay-ss2-payment-gateway-for-woocommerce
 ```
