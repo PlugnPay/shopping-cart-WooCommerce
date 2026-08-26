@@ -1,6 +1,6 @@
 ====================================================
 PlugnPay Smart Screens v2 Module
-Payment Module for WooCommerce — module v1.1.9
+Payment Module for WooCommerce — module v1.1.10
 ====================================================
 
 ***** IMPORTANT NOTES *****
@@ -66,6 +66,10 @@ To Install:
    the client. Developers can use the
    woocommerce_plugnpay_ss2_callback_source_ip filter after verifying
    a trusted proxy.
+
+   Hidden callbacks return HTTP 200 with no storefront HTML so Smart
+   Screens can display its own themed response page. Shoppers who hit
+   the return URL are redirected to WooCommerce order-received or pay.
 
 See the package overview:
   WooCommerce/README.md

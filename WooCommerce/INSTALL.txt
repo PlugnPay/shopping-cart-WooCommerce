@@ -1,16 +1,26 @@
 ====================================================
 PlugnPay API Credit Card Module
-Payment Module for WooCommerce — module v1.1.9
+Payment Module for WooCommerce — module v1.2.0
 ====================================================
 
 ***** IMPORTANT NOTES *****
 This module is provided "AS IS". Limited technical support assistance
 will be given to help diagnose/address problems with this module.
 
+Requirements:
+  - WordPress 6.0+
+  - WooCommerce 8.0+
+  - PHP 8.1+ (PHP 8.2+ recommended)
+  - HTTPS on the storefront (required for checkout)
+  - PHP cURL
+
 This module requires SSL and PHP cURL. WooCommerce collects credit card
 information on your store's checkout pages. Authorization is performed
 via PlugnPay's Remote API. Capture, void, and refund (when needed) are
 typically performed in PlugnPay Merchant Admin.
+
+Authorization Verification Hash (SHA-256) is required. Enable it in
+this module and in PlugnPay Merchant Admin → Security Administration.
 
 PCI: Collecting cards onsite increases PCI scope. For hosted (lower
 PCI) checkout, use PlugnPay Smart Screens v2 (see INSTALL_SS2.txt).
@@ -33,11 +43,20 @@ To Install:
 
 2. Activate "PlugnPay API Credit Card Payment Gateway For WooCommerce".
 
-3. WooCommerce → Settings → Payments → enable and configure
-   Gateway Account, Remote Client Password, and other options.
+3. WooCommerce → Settings → Payments → enable and configure:
+   - Gateway Account
+   - Remote Client Password (required)
+   - Authorization Hash (required, SHA-256)
+   - Authorization Hash Key (required)
+
+   Matching Authorization Hash settings must be enabled in PlugnPay
+   Merchant Admin.
 
 See the package overview:
   WooCommerce/README.md
 
 Source tree (development):
   src/plugnpay-api-cc-payment-gateway-for-woocommerce/
+
+Helper tests (no WordPress required):
+  php src/plugnpay-api-cc-payment-gateway-for-woocommerce/tests/run.php

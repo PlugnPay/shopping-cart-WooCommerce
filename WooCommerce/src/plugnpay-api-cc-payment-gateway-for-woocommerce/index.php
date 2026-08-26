@@ -3,13 +3,20 @@
  * Plugin Name: PlugnPay API Credit Card Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process API Credit Card Payments with PlugnPay gateway.
- * Version: 1.1.9
+ * Version: 1.2.0
  * Author: PlugnPay
- * Author URI: http://www.plugnpay.com
+ * Author URI: https://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_cc
+ * Requires at least: 6.0
+ * Requires PHP: 8.1
+ * Requires Plugins: woocommerce
  * License: GPL2
- * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.txt
 */
+
+defined('ABSPATH') || exit;
+
+require_once __DIR__ . '/includes/pci.php';
 
 add_action('before_woocommerce_init', 'woocommerce_plugnpay_api_cc_declare_hpos_compatibility');
 
@@ -22,12 +29,20 @@ function woocommerce_plugnpay_api_cc_declare_hpos_compatibility() {
 add_action('plugins_loaded', 'woocommerce_plugnpay_api_cc_init', 0);
 
 function woocommerce_plugnpay_api_cc_init() {
-  if (!class_exists('WC_Payment_Gateway'))
+  if (!class_exists('WC_Payment_Gateway')) {
     return;
+  }
 
-  /**
-  * Localization
-  **/
+  if (version_compare(PHP_VERSION, '8.1', '<')) {
+    add_action('admin_notices', 'woocommerce_plugnpay_api_cc_php_notice');
+    return;
+  }
+
+  if (!function_exists('WC') || version_compare(WC()->version, '8.0', '<')) {
+    add_action('admin_notices', 'woocommerce_plugnpay_api_cc_version_notice');
+    return;
+  }
+
   load_plugin_textdomain('woocommerce_plugnpay_api_cc', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
   /**
@@ -61,6 +76,7 @@ function woocommerce_plugnpay_api_cc_init() {
       add_action('woocommerce_receipt_plugnpay_api_cc', array($this, 'receipt_page'));
       add_action('woocommerce_thankyou_plugnpay_api_cc', array($this, 'thankyou_page'));
       add_action('wp_enqueue_scripts', array($this, 'enqueue_checkout_assets'));
+      add_action('admin_notices', array($this, 'admin_security_notices'));
     }
 
     /**
@@ -75,14 +91,14 @@ function woocommerce_plugnpay_api_cc_init() {
         'plugnpay-api-cc-checkout',
         plugins_url('assets/css/checkout.css', __FILE__),
         array(),
-        '1.1.9'
+        '1.2.0'
       );
 
       wp_enqueue_script(
         'plugnpay-api-cc-checkout',
         plugins_url('assets/js/checkout.js', __FILE__),
         array('jquery'),
-        '1.1.9',
+        '1.2.0',
         true
       );
 
@@ -124,7 +140,8 @@ function woocommerce_plugnpay_api_cc_init() {
           'remote_password' => array(
               'title'          => __('Remote Client Password', 'woocommerce_plugnpay_api_cc'),
               'type'           => 'password',
-              'description'    => __('Remote Client Password is created within your PlugnPay Security Administration area.', 'woocommerce_plugnpay_api_cc')),
+              'description'    => __('Leave blank to keep the current password. Created in PlugnPay Security Administration.', 'woocommerce_plugnpay_api_cc'),
+              'custom_attributes' => array('autocomplete' => 'new-password')),
           'cards_allowed'   => array(
              'title'           => __('Card Types Allowed', 'woocommerce_plugnpay_api_cc'),
              'type'            => 'text',
@@ -148,13 +165,14 @@ function woocommerce_plugnpay_api_cc_init() {
           'authhash'        => array(
               'title'          => __('Authorization Hash', 'woocommerce_plugnpay_api_cc'),
               'type'           => 'checkbox',
-              'label'          => __('Enable Authorization Verification Hash ability. [MUST configure and match the settings in your PlugnPay account.]', 'woocommerce_plugnpay_api_cc'),
-              'default'        => 'no'),
+              'label'          => __('Required. Enable Authorization Verification Hash (SHA-256). Must be enabled in your PlugnPay account with a matching key.', 'woocommerce_plugnpay_api_cc'),
+              'default'        => 'yes'),
           'authhash_key'    => array(
              'title'           => __('Authorization Hash Key', 'woocommerce_plugnpay_api_cc'),
-             'type'            => 'text',
-             'description'     => __('If using Divert Currency, list each currency with its assocated key<br>[i.e. USD:key1,BBD:key2,CAD:key3]<br>[Must configure your PlugnPay account to match]', 'woocommerce_plugnpay_api_cc'),
-             'default'         => ''),
+             'type'            => 'password',
+             'description'     => __('Required. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3]. Must match your PlugnPay account.', 'woocommerce_plugnpay_api_cc'),
+             'default'         => '',
+             'custom_attributes' => array('autocomplete' => 'new-password')),
           'authhash_fields' => array(
              'title'           => __('Authorization Hash Fields', 'woocommerce_plugnpay_api_cc'),
              'type'            => 'select',
@@ -193,9 +211,58 @@ function woocommerce_plugnpay_api_cc_init() {
     **/
     public function process_admin_options() {
       $saved_password = $this->get_option('remote_password');
+      $saved_hash = $this->get_option('authhash_key');
       parent::process_admin_options();
       if ('' === $this->get_option('remote_password') && '' !== $saved_password) {
         $this->update_option('remote_password', $saved_password);
+      }
+      if ('' === $this->get_option('authhash_key') && '' !== $saved_hash) {
+        $this->update_option('authhash_key', $saved_hash);
+      }
+    }
+
+    public function generate_password_html($key, $data) {
+      return plugnpay_pci_generate_password_html($this, $key, $data, 'woocommerce_plugnpay_api_cc');
+    }
+
+    public function validate_remote_password_field($key, $value) {
+      return plugnpay_pci_persist_encrypted_secret($this->get_option($key), $value);
+    }
+
+    public function validate_authhash_key_field($key, $value) {
+      return plugnpay_pci_persist_encrypted_secret($this->get_option($key), $value);
+    }
+
+    private function get_plain_secret($setting_key) {
+      $stored = isset($this->settings[$setting_key]) ? $this->settings[$setting_key] : '';
+      return plugnpay_pci_decrypt_secret($stored);
+    }
+
+    private function is_authhash_configured() {
+      return isset($this->settings['authhash'])
+        && $this->settings['authhash'] === 'yes'
+        && $this->get_plain_secret('authhash_key') !== '';
+    }
+
+    public function admin_security_notices() {
+      if ($this->get_option('enabled') !== 'yes' || !current_user_can('manage_woocommerce')) {
+        return;
+      }
+
+      if ($this->get_plain_secret('remote_password') === '') {
+        echo '<div class="error"><p>' . esc_html__('PlugnPay API CC: Remote Client Password is required.', 'woocommerce_plugnpay_api_cc') . '</p></div>';
+      }
+
+      if (!$this->is_authhash_configured()) {
+        echo '<div class="error"><p>' . esc_html__('PlugnPay API CC: Authorization Verification Hash and key are required before checkout can proceed.', 'woocommerce_plugnpay_api_cc') . '</p></div>';
+      }
+
+      if (!plugnpay_pci_storefront_is_secure()) {
+        echo '<div class="error"><p>' . esc_html__('PlugnPay API CC: HTTPS is required on the storefront because card data is collected onsite.', 'woocommerce_plugnpay_api_cc') . '</p></div>';
+      }
+
+      if (version_compare(PHP_VERSION, '8.2', '<')) {
+        echo '<div class="notice notice-warning"><p>' . esc_html__('PlugnPay API CC: PHP 8.2 or higher is recommended.', 'woocommerce_plugnpay_api_cc') . '</p></div>';
       }
     }
 
@@ -211,13 +278,13 @@ function woocommerce_plugnpay_api_cc_init() {
         $cards_list = explode(',', $cards_allowed);
 
         foreach ($cards_list as $card) {
-          $card = trim($card);
-          if ($card === '') {
+          $card_slug = strtolower(preg_replace('/[^a-zA-Z0-9_-]/', '', trim($card)));
+          if ($card_slug === '') {
             continue;
           }
 
-          $img_url = $icon_path . strtolower($card) . '.png';
-          $icons .= '<img src="' . esc_url($img_url) . '" alt="' . esc_attr(ucwords($card)) . '" />';
+          $img_url = $icon_path . $card_slug . '.png';
+          $icons .= '<img src="' . esc_url($img_url) . '" alt="' . esc_attr(ucwords($card_slug)) . '" />';
         }
 
         if ($icons !== '') {
@@ -232,8 +299,8 @@ function woocommerce_plugnpay_api_cc_init() {
     * Admin Panel Options
     **/
     public function admin_options() {
-      echo '<h3>'.__('PlugnPay API CC Payment Gateway', 'woocommerce_plugnpay_api_cc').'</h3>';
-      echo '<p>'.__('PlugnPay is a popular payment gateway for online payment processing', 'woocommerce_plugnpay_api_cc').'</p>';
+      echo '<h3>'.esc_html__('PlugnPay API CC Payment Gateway', 'woocommerce_plugnpay_api_cc').'</h3>';
+      echo '<p>'.esc_html__('PlugnPay is a popular payment gateway for online payment processing', 'woocommerce_plugnpay_api_cc').'</p>';
       echo '<table class="form-table">';
       $this->generate_settings_html();
       echo '</table>';
@@ -244,7 +311,7 @@ function woocommerce_plugnpay_api_cc_init() {
     **/
     function payment_fields() {
       if ($this->description) {
-        echo '<div class="plugnpay-cc-description">' . wpautop(wptexturize($this->description)) . '</div>';
+        echo '<div class="plugnpay-cc-description">' . wp_kses_post(wpautop(wptexturize($this->description))) . '</div>';
       }
 
       echo '<fieldset class="plugnpay-cc-fields wc-payment-form">';
@@ -288,13 +355,13 @@ function woocommerce_plugnpay_api_cc_init() {
         echo '<div class="plugnpay-cc-giftcard">';
 
         if (!empty($this->settings['giftcard_descr'])) {
-          echo '<div class="plugnpay-cc-giftcard-heading">' . wpautop(wptexturize($this->settings['giftcard_descr'])) . '</div>';
+          echo '<div class="plugnpay-cc-giftcard-heading">' . wp_kses_post(wpautop(wptexturize($this->settings['giftcard_descr']))) . '</div>';
         }
 
         $this->render_giftcard_fields();
 
         if (!empty($this->settings['giftcard_note'])) {
-          echo '<div class="plugnpay-cc-giftcard-note">' . wpautop(wptexturize($this->settings['giftcard_note'])) . '</div>';
+          echo '<div class="plugnpay-cc-giftcard-note">' . wp_kses_post(wpautop(wptexturize($this->settings['giftcard_note']))) . '</div>';
         }
 
         echo '</div>';
@@ -617,8 +684,18 @@ function woocommerce_plugnpay_api_cc_init() {
         return array('result' => 'failure');
       }
 
-      if (empty($this->settings['gateway_account']) || empty($this->settings['remote_password'])) {
+      if (empty($this->settings['gateway_account']) || $this->get_plain_secret('remote_password') === '') {
         wc_add_notice(__('(Transaction Error) Payment gateway is not configured.', 'woocommerce_plugnpay_api_cc'), 'error');
+        return array('result' => 'failure');
+      }
+
+      if (!$this->is_authhash_configured()) {
+        wc_add_notice(__('(Transaction Error) Payment gateway is not configured for Authorization Hash.', 'woocommerce_plugnpay_api_cc'), 'error');
+        return array('result' => 'failure');
+      }
+
+      if (!plugnpay_pci_storefront_is_secure()) {
+        wc_add_notice(__('(Transaction Error) Secure HTTPS checkout is required.', 'woocommerce_plugnpay_api_cc'), 'error');
         return array('result' => 'failure');
       }
 
@@ -636,6 +713,9 @@ function woocommerce_plugnpay_api_cc_init() {
       curl_setopt($request, CURLOPT_POSTFIELDS, $post_string);
       curl_setopt($request, CURLOPT_SSL_VERIFYPEER, true);
       curl_setopt($request, CURLOPT_SSL_VERIFYHOST, 2);
+      if (defined('CURLPROTO_HTTPS')) {
+        curl_setopt($request, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+      }
       curl_setopt($request, CURLOPT_TIMEOUT, 60);
       curl_setopt($request, CURLOPT_CONNECTTIMEOUT, 30);
       $post_response = curl_exec($request);
@@ -685,7 +765,7 @@ function woocommerce_plugnpay_api_cc_init() {
     public function generate_plugnpay_api_cc_params($order) {
       $gatewayAccount = $this->settings['gateway_account'];
       $currencyCode = $order->get_currency();
-      $remotePassword = $this->settings['remote_password'];
+      $remotePassword = $this->get_plain_secret('remote_password');
       $order_amount = $this->get_order_amount($order);
       $order_id = $order->get_id();
 
@@ -750,36 +830,20 @@ function woocommerce_plugnpay_api_cc_init() {
         $plugnpayapi_args['authtype'] = 'authonly';
       }
 
-      if ($this->settings['authhash'] == 'yes') {
-         $string_fields = '';
-         if ($this->settings['authhash_fields'] == '3') {
-            $string_fields = $order_id . $order_amount . strtolower($gatewayAccount);
-         }
-         else if ($this->settings['authhash_fields'] == '2') {
-            $string_fields = $order_amount . strtolower($gatewayAccount);
-         }
-         else {
-            $string_fields = strtolower($gatewayAccount);
-         }
-
-         $timestamp = gmdate("YmdHis", time());
-         $authhash_key = $this->settings['authhash_key'];
-
-         if (($this->settings['divert_currency'] == 'yes') && (preg_match("/\,/", $authhash_key))) {
-           $hashkey_list = explode(',', $authhash_key);
-           foreach ($hashkey_list as $i) {
-             list($altCurrency,$altHashKey) = explode(':', $i, 2);
-             if (strtoupper($currencyCode) == strtoupper($altCurrency)) {
-               $authhash_key = $altHashKey;
-               break 1;
-             }
-           }
-         }
-
-         $hash_string = $authhash_key . $timestamp . $string_fields;
-         $plugnpayapi_args['authhash'] = md5($hash_string);
-         $plugnpayapi_args['transacttime'] = $timestamp;
-      }
+      $timestamp = gmdate("YmdHis", time());
+      $authhash_key = plugnpay_pci_resolve_authhash_key(
+        $this->get_plain_secret('authhash_key'),
+        $currencyCode,
+        $this->settings['divert_currency'] == 'yes'
+      );
+      $string_fields = plugnpay_pci_authhash_string_fields(
+        $this->settings['authhash_fields'],
+        $order_id,
+        $order_amount,
+        $gatewayAccount
+      );
+      $plugnpayapi_args['authhash'] = plugnpay_pci_authhash($authhash_key . $timestamp . $string_fields);
+      $plugnpayapi_args['transacttime'] = $timestamp;
 
       if ($this->settings['giftcard_allow'] == 'yes') {
         $mpgiftcard = $this->get_posted_field('pnp_mpgiftcard');
@@ -807,13 +871,21 @@ function woocommerce_plugnpay_api_cc_init() {
   add_filter('woocommerce_payment_gateways', 'woocommerce_add_plugnpay_api_cc_gateway');
 }
 
+function woocommerce_plugnpay_api_cc_php_notice() {
+  echo '<div class="error"><p>' . esc_html__('PlugnPay API CC requires PHP 8.1 or higher.', 'woocommerce_plugnpay_api_cc') . '</p></div>';
+}
+
+function woocommerce_plugnpay_api_cc_version_notice() {
+  echo '<div class="error"><p>' . esc_html__('PlugnPay API CC requires WooCommerce 8.0 or higher.', 'woocommerce_plugnpay_api_cc') . '</p></div>';
+}
+
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'plugnpay_cc_action_links');
 
 function plugnpay_cc_action_links ($links) {
   $gateway_links = array(
-    '<a href="http://www.gatewaystatus.com/" target="_blank">Gateway Status</a>',
-    '<a href="https://helpdesk.plugnpay.com/" target="_blank">Online Helpdesk</a>',
-    '<a href="https://pay1.plugnpay.com/admin/" target="_blank">Merchant Admin</a>'
+    '<a href="https://www.gatewaystatus.com/" target="_blank" rel="noopener noreferrer">Gateway Status</a>',
+    '<a href="https://helpdesk.plugnpay.com/" target="_blank" rel="noopener noreferrer">Online Helpdesk</a>',
+    '<a href="https://pay1.plugnpay.com/admin/" target="_blank" rel="noopener noreferrer">Merchant Admin</a>'
   );
   return array_merge($links, $gateway_links);
 }

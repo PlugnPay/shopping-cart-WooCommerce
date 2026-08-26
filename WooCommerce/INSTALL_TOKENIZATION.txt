@@ -1,6 +1,6 @@
 ====================================================
 PlugnPay API CC Tokenization Module
-Payment Module for WooCommerce — module v1.0.3
+Payment Module for WooCommerce — module v1.1.0
 ====================================================
 
 ***** IMPORTANT NOTES *****
@@ -10,6 +10,16 @@ will be given to help diagnose/address problems with this module.
 This module requires SSL and PHP cURL. WooCommerce collects credit card
 information on your store's checkout pages for new-card payments.
 Saved cards are charged via PlugnPay Remote API authprev (card-on-file).
+
+Requirements:
+  - WordPress 6.0+
+  - WooCommerce 8.0+
+  - PHP 8.1+ (PHP 8.2+ recommended)
+  - HTTPS on the storefront (required for checkout)
+  - PHP cURL
+
+Authorization Verification Hash (SHA-256) is required. Enable it in
+this module and in PlugnPay Merchant Admin → Security Administration.
 
 Tokens are bound to the PlugnPay gateway account that created them.
 With Divert Currency enabled, a card saved on account A cannot be used
@@ -74,7 +84,9 @@ To Install:
 2. Activate "PlugnPay API CC Tokenization Payment Gateway For WooCommerce".
 
 3. WooCommerce → Settings → Payments → enable and configure
-   Gateway Account, Remote Client Password, and other options.
+   Gateway Account, Remote Client Password, Authorization Hash (SHA-256),
+   and Authorization Hash Key. Matching hash settings must be enabled
+   in PlugnPay Merchant Admin.
 
    Configurable elements of note:
    - Saved Card CVV: optionally require CVV for token-based checkouts
@@ -85,3 +97,6 @@ To Install:
 
 See the package base overview:
   WooCommerce/README.md
+
+Helper tests (no WordPress required):
+  php src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/tests/run.php

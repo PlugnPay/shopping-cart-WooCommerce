@@ -6,7 +6,7 @@ Tags: woocommerce plugnpay.com, plugnpay.com, payment gateway, woocommerce, wooc
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.1.9
+Stable tag: 1.1.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,11 @@ Yes. HTTPS is required for checkout and payment return URLs.
 * None Available
 
 == Changelog ==
+= 1.1.10 =
+* Fix Smart Screens response page theme: hidden callbacks return 200 with no WordPress HTML
+* Send shopper browser returns to a themed WooCommerce page instead of a blank 403
+* Add continue URL on the hosted receipt to the WooCommerce order-received page
+
 = 1.1.9 =
 * PCI DSS: require Authorization Hash (SHA-256) and block checkout if it is not configured
 * PCI DSS: require PHP 8.1+ and HTTPS on the storefront (local/development excepted)
@@ -177,6 +182,7 @@ Yes. HTTPS is required for checkout and payment return URLs.
 
 == Upgrade Notice ==
 * Upgrade is required for versions below 1.1.9. Authorization Hash and HTTPS are now required. PHP 8.1 or higher is required.
+* 1.1.10 restores the Smart Screens hosted response theme after payment.
 
 == Arbitrary section ==
 * WooCommerce Blocks Compatibility

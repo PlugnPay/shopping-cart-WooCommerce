@@ -62,3 +62,21 @@ function plugnpay_ss2_is_allowed_callback_ip($ip) {
 
   return in_array($ip, $allowed, true);
 }
+
+/**
+ * How the wc-api endpoint should answer.
+ *
+ * Allowlisted PlugnPay IPs are a hidden server POST. Return 200 with an empty
+ * body so Smart Screens can render its own themed response page. A 302 or a
+ * full WordPress document is displayed inside Smart Screens and drops most of
+ * that theme.
+ *
+ * Any other IP is treated as the shopper's browser: send them to a themed
+ * WooCommerce page. Never answer those requests with a blank 403.
+ *
+ * @param string $ip
+ * @return string 'silent' or 'storefront'
+ */
+function plugnpay_ss2_callback_response_mode($ip) {
+  return plugnpay_ss2_is_allowed_callback_ip($ip) ? 'silent' : 'storefront';
+}

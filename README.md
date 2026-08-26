@@ -16,7 +16,7 @@ PlugnPay payment modules for WooCommerce.
 |---|---|
 | Download | [woocommerce_api_cc_module.zip](./WooCommerce/woocommerce_api_cc_module.zip) |
 | Source | [src/plugnpay-api-cc-…](./WooCommerce/src/plugnpay-api-cc-payment-gateway-for-woocommerce/) |
-| Version | v1.1.9 |
+| Version | v1.2.0 |
 | Checkout | Onsite card fields |
 | Card/bank data on your server | Yes |
 | PCI scope | Higher |
@@ -27,7 +27,7 @@ PlugnPay payment modules for WooCommerce.
 |---|---|
 | Download | [woocommerce_api_ach_module.zip](./WooCommerce/woocommerce_api_ach_module.zip) |
 | Source | [src/plugnpay-api-ach-…](./WooCommerce/src/plugnpay-api-ach-payment-gateway-for-woocommerce/) |
-| Version | v1.1.9 |
+| Version | v1.2.0 |
 | Checkout | Onsite ACH fields |
 | Card/bank data on your server | Yes |
 | PCI scope | Higher |
@@ -38,7 +38,7 @@ PlugnPay payment modules for WooCommerce.
 |---|---|
 | Download | [woocommerce_api_cc_tokenization_module.zip](./WooCommerce/woocommerce_api_cc_tokenization_module.zip) |
 | Source | [src/plugnpay-api-cc-tokenization-…](./WooCommerce/src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/) |
-| Version | v1.0.3 |
+| Version | v1.1.0 |
 | Checkout | Onsite card fields + saved cards |
 | Card/bank data on your server | Yes (new card); saved cards use authprev |
 | PCI scope | Higher |
@@ -49,7 +49,7 @@ PlugnPay payment modules for WooCommerce.
 |---|---|
 | Download | [woocommerce_ss2_module.zip](./WooCommerce/woocommerce_ss2_module.zip) |
 | Source | [src/plugnpay-ss2-…](./WooCommerce/src/plugnpay-ss2-payment-gateway-for-woocommerce/) |
-| Version | v1.1.9 |
+| Version | v1.1.10 |
 | Checkout | Redirect → `https://pay1.plugnpay.com/pay/` |
 | Card/bank data on your server | No |
 | PCI scope | Lower |
@@ -89,7 +89,7 @@ The **API Credit Card Tokenization** module adds card-on-file (saved cards) for 
 - Separate modules for Credit Card, ACH/eCheck, and Credit Card Tokenization.
 - Customer never leaves your site or sees the PlugnPay billing pages.
 - Storefront HTTPS is required.
-- Authorization Verification Hash and currency divert options available.
+- Authorization Verification Hash (SHA-256) is required. Currency divert options available.
 
 ### Smart Screens v2
 
@@ -110,6 +110,6 @@ These modules do not support Blocks checkout yet. If checkout fails, disable Car
 
 ## Security
 
-WooCommerce is a common target for carding attacks. Use fraud protection add-ons, CAPTCHA or 2FA before payment, and keep PlugnPay Authorization Hash Verification enabled.
+WooCommerce is a common target for carding attacks. Use fraud protection add-ons, CAPTCHA or 2FA before payment, and keep PlugnPay Authorization Hash Verification (SHA-256) enabled.
 
 Contact PlugnPay support if you need help with these recommendations.

@@ -1,6 +1,6 @@
 # WooCommerce — PlugnPay Payment Modules
 
-Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.1.9**, API ACH **v1.1.9**, API CC Tokenization **v1.0.3**, Smart Screens v2 **v1.1.9**.
+Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.2.0**, API ACH **v1.2.0**, API CC Tokenization **v1.1.0**, Smart Screens v2 **v1.1.10**.
 
 Install through WordPress → Plugins → Upload Plugin, then configure under WooCommerce → Settings → Payments.
 
@@ -57,22 +57,22 @@ You may install more than one module; enable only the payment method(s) you need
 - Source: [src/plugnpay-api-cc-payment-gateway-for-woocommerce/](./src/plugnpay-api-cc-payment-gateway-for-woocommerce/)
 - Quick install: [INSTALL.txt](./INSTALL.txt)
 
-Collects card data on your storefront and posts from the server to PlugnPay Remote API. Optional gift card split-payment fields when enabled in settings.
+Collects card data on your storefront and posts from the server to PlugnPay Remote API. HTTPS and Authorization Verification Hash (SHA-256) are required. Optional gift card split-payment fields when enabled in settings.
 
 ## API ACH/eCheck (onsite)
 
 - Source: [src/plugnpay-api-ach-payment-gateway-for-woocommerce/](./src/plugnpay-api-ach-payment-gateway-for-woocommerce/)
 - Quick install: [INSTALL_ACH.txt](./INSTALL_ACH.txt)
 
-Collects ACH/eCheck data on your storefront and posts from the server to PlugnPay Remote API.
+Collects ACH/eCheck data on your storefront and posts from the server to PlugnPay Remote API. HTTPS and Authorization Verification Hash (SHA-256) are required.
 
 ## API Credit Card Tokenization (onsite + card on file)
 
 - Source: [src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/](./src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/)
 - Quick install: [INSTALL_TOKENIZATION.txt](./INSTALL_TOKENIZATION.txt)
-- Version: **v1.0.3**
+- Version: **v1.1.0**
 
-Collects card data on your storefront for new cards. Behavior:
+Collects card data on your storefront for new cards. HTTPS and Authorization Verification Hash (SHA-256) are required. Behavior:
 
 | Flow | Remote API |
 |---|---|

@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay SSv2 Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process Smart Screens v2 Payments with PlugnPay gateway.
- * Version: 1.1.9
+ * Version: 1.1.10
  * Author: PlugnPay
  * Author URI: https://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_ss2
@@ -84,7 +84,7 @@ function woocommerce_plugnpay_ss2_init() {
         'plugnpay-ss2-checkout',
         plugins_url('assets/css/checkout.css', __FILE__),
         array(),
-        '1.1.9'
+        '1.1.10'
       );
     }
 
@@ -405,88 +405,94 @@ function woocommerce_plugnpay_ss2_init() {
     }
 
     /**
-     * Handle the PlugnPay Smart Screens server callback.
+     * Handle the PlugnPay Smart Screens server callback and shopper return.
      *
-     * Only requests from published PlugnPay callback server IPs are accepted.
+     * Hidden POSTs from published PlugnPay callback IPs update the order and
+     * return 200 with no body so Smart Screens can show its themed response
+     * page. Shopper browsers are sent to a themed WooCommerce page and cannot
+     * mark an order paid.
      */
     public function check_plugnpay_response() {
       $source_ip = $this->get_callback_source_ip();
-
-      if (!plugnpay_ss2_is_allowed_callback_ip($source_ip)) {
-        $this->log_callback_event(
-          sprintf('Rejected Smart Screens callback from unauthorized IP: %s', $source_ip === '' ? 'unknown' : $source_ip)
-        );
-        status_header(403);
-        exit;
-      }
-
-      if (empty($_POST)) {
-        wp_safe_redirect(wc_get_checkout_url());
-        exit;
-      }
+      $mode = plugnpay_ss2_callback_response_mode($source_ip);
 
       $order_id = isset($_POST['pt_order_classifier']) ? absint(wp_unslash($_POST['pt_order_classifier'])) : 0;
-      $order = wc_get_order($order_id);
+      $order = $order_id ? wc_get_order($order_id) : false;
 
-      if (!$order) {
-        wp_safe_redirect(wc_get_checkout_url());
+      if ($mode === 'silent') {
+        if (!empty($_POST) && $order) {
+          $this->apply_plugnpay_callback($order);
+        }
+        elseif (!empty($_POST)) {
+          $this->log_callback_event('Rejected silent callback: order not found');
+        }
+
+        status_header(200);
+        header('Content-Type: text/plain; charset=UTF-8');
         exit;
       }
 
+      if ($order && in_array($order->get_status(), array('processing', 'completed'), true)) {
+        wp_safe_redirect($order->get_checkout_order_received_url());
+        exit;
+      }
+
+      if ($order) {
+        wc_add_notice($this->settings['failed_message'], 'error');
+        wp_safe_redirect($order->get_checkout_payment_url(true));
+        exit;
+      }
+
+      wp_safe_redirect(wc_get_checkout_url());
+      exit;
+    }
+
+    /**
+     * Apply a verified PlugnPay hidden callback to the order.
+     *
+     * @param WC_Order $order
+     * @return bool
+     */
+    private function apply_plugnpay_callback($order) {
       $response_code   = isset($_POST['pi_response_code']) ? sanitize_text_field(wp_unslash($_POST['pi_response_code'])) : '';
       $response_status = isset($_POST['pi_response_status']) ? sanitize_text_field(wp_unslash($_POST['pi_response_status'])) : '';
       $transaction_id  = isset($_POST['pt_order_id']) ? sanitize_text_field(wp_unslash($_POST['pt_order_id'])) : '';
 
-      $this->msg['class']   = 'error';
-      $this->msg['message'] = $this->settings['failed_message'];
-      $payment_success      = false;
-
-      if ($response_code !== '' && $response_status === 'success') {
-        $order_status = $order->get_status();
-
-        if (in_array($order_status, array('processing', 'completed'), true)) {
-          $payment_success      = true;
-          $this->msg['class']   = 'success';
-          $this->msg['message'] = $this->settings['success_message'];
-        }
-        elseif (in_array($order_status, array('pending', 'on-hold', 'failed'), true)) {
-          if (!$this->callback_matches_order($order, $transaction_id)) {
-            $this->fail_unpaid_order($order);
-          }
-          else {
-            $order->payment_complete($transaction_id);
-            $order->add_order_note(
-              sprintf(
-                /* translators: %s: PlugnPay transaction reference */
-                __('PlugnPay payment successful. Ref Number/Transaction ID: %s', 'woocommerce_plugnpay_ss2'),
-                $transaction_id
-              )
-            );
-            $order->add_order_note($this->settings['success_message']);
-
-            if (WC()->cart) {
-              WC()->cart->empty_cart();
-            }
-
-            $payment_success      = true;
-            $this->msg['class']   = 'success';
-            $this->msg['message'] = $this->settings['success_message'];
-          }
-        }
-      }
-      else {
+      if ($response_code === '' || $response_status !== 'success') {
         $this->fail_unpaid_order($order);
+        return false;
       }
 
-      if ($payment_success) {
-        wp_safe_redirect($order->get_checkout_order_received_url());
-      }
-      else {
-        wc_add_notice($this->settings['failed_message'], 'error');
-        wp_safe_redirect($order->get_checkout_payment_url(true));
+      $order_status = $order->get_status();
+
+      if (in_array($order_status, array('processing', 'completed'), true)) {
+        return true;
       }
 
-      exit;
+      if (!in_array($order_status, array('pending', 'on-hold', 'failed'), true)) {
+        return false;
+      }
+
+      if (!$this->callback_matches_order($order, $transaction_id)) {
+        $this->fail_unpaid_order($order);
+        return false;
+      }
+
+      $order->payment_complete($transaction_id);
+      $order->add_order_note(
+        sprintf(
+          /* translators: %s: PlugnPay transaction reference */
+          __('PlugnPay payment successful. Ref Number/Transaction ID: %s', 'woocommerce_plugnpay_ss2'),
+          $transaction_id
+        )
+      );
+      $order->add_order_note($this->settings['success_message']);
+
+      if (WC()->cart) {
+        WC()->cart->empty_cart();
+      }
+
+      return true;
     }
 
     /**
@@ -687,6 +693,7 @@ function woocommerce_plugnpay_ss2_init() {
         'pb_success_url'                  => $callback_url,
         'pb_bad_card_url'                 => $callback_url,
         'pb_problem_url'                  => $callback_url,
+        'pb_receipt_transaction_url'      => $order->get_checkout_order_received_url(),
         'pd_collect_company'              => 'yes',
         'pt_billing_name'                 => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
         'pt_billing_company'              => $order->get_billing_company(),
