@@ -64,19 +64,14 @@ function plugnpay_ss2_is_allowed_callback_ip($ip) {
 }
 
 /**
- * How the wc-api endpoint should answer.
+ * WooCommerce checkout endpoint whose HTML PlugnPay should capture and echo.
  *
- * Allowlisted PlugnPay IPs are a hidden server POST. Return 200 with an empty
- * body so Smart Screens can render its own themed response page. A 302 or a
- * full WordPress document is displayed inside Smart Screens and drops most of
- * that theme.
+ * Hidden POSTs must receive a 200 storefront document. Redirects and empty
+ * bodies are what the shopper sees after PlugnPay echoes the response.
  *
- * Any other IP is treated as the shopper's browser: send them to a themed
- * WooCommerce page. Never answer those requests with a blank 403.
- *
- * @param string $ip
- * @return string 'silent' or 'storefront'
+ * @param bool $payment_success
+ * @return string
  */
-function plugnpay_ss2_callback_response_mode($ip) {
-  return plugnpay_ss2_is_allowed_callback_ip($ip) ? 'silent' : 'storefront';
+function plugnpay_ss2_hidden_post_endpoint($payment_success) {
+  return $payment_success ? 'order-received' : 'order-pay';
 }

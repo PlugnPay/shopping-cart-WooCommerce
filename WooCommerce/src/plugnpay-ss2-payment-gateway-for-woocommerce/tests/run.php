@@ -42,9 +42,8 @@ plugnpay_ss2_assert(!plugnpay_ss2_is_allowed_callback_ip('127.0.0.1'), 'reject l
 plugnpay_ss2_assert(!plugnpay_ss2_is_allowed_callback_ip(''), 'reject empty IP');
 plugnpay_ss2_assert(!plugnpay_ss2_is_allowed_callback_ip('not-an-ip'), 'reject non-IP');
 
-plugnpay_ss2_assert(plugnpay_ss2_callback_response_mode('18.214.78.64') === 'silent', 'allowlisted IP is silent callback');
-plugnpay_ss2_assert(plugnpay_ss2_callback_response_mode('203.0.113.10') === 'storefront', 'shopper IP is storefront return');
-plugnpay_ss2_assert(plugnpay_ss2_callback_response_mode('') === 'storefront', 'empty IP is storefront return');
+plugnpay_ss2_assert(plugnpay_ss2_hidden_post_endpoint(true) === 'order-received', 'success capture endpoint');
+plugnpay_ss2_assert(plugnpay_ss2_hidden_post_endpoint(false) === 'order-pay', 'failure capture endpoint');
 
 plugnpay_ss2_assert(
   plugnpay_ss2_authhash_string_fields('3', '42', '10.00', 'DemoAcct') === '4210.00demoacct',

@@ -6,7 +6,7 @@ Tags: woocommerce plugnpay.com, plugnpay.com, payment gateway, woocommerce, wooc
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.1.10
+Stable tag: 1.1.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,10 @@ Yes. HTTPS is required for checkout and payment return URLs.
 * None Available
 
 == Changelog ==
+= 1.1.11 =
+* Hidden PlugnPay POST captures a full themed WooCommerce thank-you or pay page (no empty body, no 302)
+* Point success/decline URLs at order-received and order-pay instead of wc-api
+
 = 1.1.10 =
 * Fix Smart Screens response page theme: hidden callbacks return 200 with no WordPress HTML
 * Send shopper browser returns to a themed WooCommerce page instead of a blank 403

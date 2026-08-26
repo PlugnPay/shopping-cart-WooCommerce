@@ -1,6 +1,6 @@
 # WooCommerce — PlugnPay Payment Modules
 
-Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.2.0**, API ACH **v1.2.0**, API CC Tokenization **v1.1.0**, Smart Screens v2 **v1.1.10**.
+Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.2.0**, API ACH **v1.2.0**, API CC Tokenization **v1.1.0**, Smart Screens v2 **v1.1.11**.
 
 Install through WordPress → Plugins → Upload Plugin, then configure under WooCommerce → Settings → Payments.
 
