@@ -1,6 +1,6 @@
 # WooCommerce — PlugnPay Payment Modules
 
-Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.1.9**, API ACH **v1.1.9**, API CC Tokenization **v1.0.3**, Smart Screens v2 **v1.1.8.5**.
+Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.1.9**, API ACH **v1.1.9**, API CC Tokenization **v1.0.3**, Smart Screens v2 **v1.1.9**.
 
 Install through WordPress → Plugins → Upload Plugin, then configure under WooCommerce → Settings → Payments.
 
@@ -89,7 +89,7 @@ Tokens are strictly bound to the PlugnPay account that created them (including w
 - Source: [src/plugnpay-ss2-payment-gateway-for-woocommerce/](./src/plugnpay-ss2-payment-gateway-for-woocommerce/)
 - Quick install: [INSTALL_SS2.txt](./INSTALL_SS2.txt)
 
-Redirects customers to PlugnPay hosted Smart Screens. WooCommerce does not collect sensitive payment data. Capture / void / refund are done in PlugnPay Merchant Admin when applicable.
+Redirects customers to PlugnPay hosted Smart Screens. WooCommerce does not collect sensitive payment data. HTTPS and Authorization Verification Hash (SHA-256) are required. Capture / void / refund are done in PlugnPay Merchant Admin when applicable.
 
 ## Common install steps (all)
 
@@ -97,7 +97,7 @@ Redirects customers to PlugnPay hosted Smart Screens. WooCommerce does not colle
    Alternatively, copy the plugin folder from `src/` into `wp-content/plugins/`.
 2. Activate the plugin.
 3. WooCommerce → **Settings** → **Payments** → configure credentials and options.
-4. Ensure storefront HTTPS is enabled (required for API modules; strongly recommended for SS2).
+4. Ensure storefront HTTPS is enabled (required for all modules).
 
 ## WooCommerce Blocks
 

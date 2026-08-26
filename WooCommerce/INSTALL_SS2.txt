@@ -1,6 +1,6 @@
 ====================================================
 PlugnPay Smart Screens v2 Module
-Payment Module for WooCommerce — module v1.1.8.5
+Payment Module for WooCommerce — module v1.1.9
 ====================================================
 
 ***** IMPORTANT NOTES *****
@@ -9,8 +9,16 @@ will be given to help diagnose/address problems with this module.
 
 This module redirects customers to PlugnPay hosted Smart Screens
 (https://pay1.plugnpay.com/pay/). WooCommerce does not collect
-sensitive payment data at checkout. HTTPS on your store is strongly
-recommended for return URL / session handling.
+sensitive payment data at checkout.
+
+Requirements:
+  - WordPress 6.0+
+  - WooCommerce 8.0+
+  - PHP 8.1+ (PHP 8.2+ recommended)
+  - HTTPS on the storefront (required for checkout)
+
+Authorization Verification Hash (SHA-256) is required. Enable it in
+this module and in PlugnPay Merchant Admin → Security Administration.
 
 Capture, void, and refund (when needed) are typically performed in
 PlugnPay Merchant Admin.
@@ -33,11 +41,37 @@ To Install:
 
 2. Activate "PlugnPay SSv2 Payment Gateway For WooCommerce".
 
-3. WooCommerce → Settings → Payments → enable and configure
-   Gateway Account and other options (including Auth Hash if used).
+3. WooCommerce → Settings → Payments → enable and configure:
+   - Gateway Username
+   - Authorization Hash (required, SHA-256)
+   - Authorization Hash Key (required)
+   - Response Verification Hash Key (recommended)
+
+   Matching Authorization and Response Verification Hash settings must
+   be enabled in PlugnPay Merchant Admin.
+
+4. Payment completion callbacks are accepted only from PlugnPay
+   callback servers. Allow inbound HTTPS from:
+
+     18.214.78.64
+     52.3.174.161
+     54.91.210.62
+     69.18.198.4
+     107.22.32.178
+     3.210.249.25
+
+   If the store sits behind a reverse proxy or CDN, configure the web
+   server so REMOTE_ADDR is the original connecting IP (for example
+   mod_remoteip or nginx real_ip). Do not trust X-Forwarded-For from
+   the client. Developers can use the
+   woocommerce_plugnpay_ss2_callback_source_ip filter after verifying
+   a trusted proxy.
 
 See the package overview:
   WooCommerce/README.md
 
 Source tree (development):
   src/plugnpay-ss2-payment-gateway-for-woocommerce/
+
+Helper tests (no WordPress required):
+  php src/plugnpay-ss2-payment-gateway-for-woocommerce/tests/run.php

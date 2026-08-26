@@ -49,7 +49,7 @@ PlugnPay payment modules for WooCommerce.
 |---|---|
 | Download | [woocommerce_ss2_module.zip](./WooCommerce/woocommerce_ss2_module.zip) |
 | Source | [src/plugnpay-ss2-…](./WooCommerce/src/plugnpay-ss2-payment-gateway-for-woocommerce/) |
-| Version | v1.1.8.5 |
+| Version | v1.1.9 |
 | Checkout | Redirect → `https://pay1.plugnpay.com/pay/` |
 | Card/bank data on your server | No |
 | PCI scope | Lower |
@@ -97,8 +97,8 @@ The **API Credit Card Tokenization** module adds card-on-file (saved cards) for 
 - Supports Credit Card, ACH/eCheck, and other options configured on your PlugnPay account.
 - WooCommerce does **not** collect sensitive payment data at checkout.
 - Customer is redirected to PlugnPay, then returned after approval or decline.
-- HTTPS on your store is strongly recommended.
-- Authorization Verification Hash and currency divert options available.
+- HTTPS on your store is required.
+- Authorization Verification Hash (SHA-256) is required.
 
 ## WooCommerce Blocks Compatibility
 
@@ -110,6 +110,6 @@ These modules do not support Blocks checkout yet. If checkout fails, disable Car
 
 ## Security
 
-WooCommerce is a common target for carding attacks. Use fraud protection add-ons, CAPTCHA or 2FA before payment, and enable PlugnPay Authentication Hash Verification when possible.
+WooCommerce is a common target for carding attacks. Use fraud protection add-ons, CAPTCHA or 2FA before payment, and keep PlugnPay Authorization Hash Verification enabled.
 
 Contact PlugnPay support if you need help with these recommendations.

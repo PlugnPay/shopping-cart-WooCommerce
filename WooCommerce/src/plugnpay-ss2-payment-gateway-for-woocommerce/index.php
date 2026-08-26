@@ -3,18 +3,22 @@
  * Plugin Name: PlugnPay SSv2 Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process Smart Screens v2 Payments with PlugnPay gateway.
- * Version: 1.1.8.5
+ * Version: 1.1.9
  * Author: PlugnPay
- * Author URI: http://www.plugnpay.com
+ * Author URI: https://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_ss2
  * Requires at least: 6.0
- * Requires PHP: 7.4
+ * Requires PHP: 8.1
  * Requires Plugins: woocommerce
  * License: GPL2
- * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.txt
  */
 
 defined('ABSPATH') || exit;
+
+require_once __DIR__ . '/includes/callback-ip.php';
+require_once __DIR__ . '/includes/crypto.php';
+require_once __DIR__ . '/includes/amounts.php';
 
 add_action('before_woocommerce_init', 'woocommerce_plugnpay_ss2_declare_hpos_compatibility');
 
@@ -28,6 +32,11 @@ add_action('plugins_loaded', 'woocommerce_plugnpay_ss2_init', 0);
 
 function woocommerce_plugnpay_ss2_init() {
   if (!class_exists('WC_Payment_Gateway')) {
+    return;
+  }
+
+  if (version_compare(PHP_VERSION, '8.1', '<')) {
+    add_action('admin_notices', 'woocommerce_plugnpay_ss2_php_notice');
     return;
   }
 
@@ -60,6 +69,7 @@ function woocommerce_plugnpay_ss2_init() {
       add_action('woocommerce_receipt_plugnpay', array($this, 'receipt_page'));
       add_action('woocommerce_thankyou_plugnpay', array($this, 'thankyou_page'));
       add_action('wp_enqueue_scripts', array($this, 'enqueue_checkout_assets'));
+      add_action('admin_notices', array($this, 'admin_security_notices'));
     }
 
     /**
@@ -74,7 +84,7 @@ function woocommerce_plugnpay_ss2_init() {
         'plugnpay-ss2-checkout',
         plugins_url('assets/css/checkout.css', __FILE__),
         array(),
-        '1.1.8.5'
+        '1.1.9'
       );
     }
 
@@ -90,13 +100,13 @@ function woocommerce_plugnpay_ss2_init() {
         $cards_list = explode(',', $cards_allowed);
 
         foreach ($cards_list as $card) {
-          $card = trim($card);
-          if ($card === '') {
+          $card_slug = strtolower(preg_replace('/[^a-zA-Z0-9_-]/', '', trim($card)));
+          if ($card_slug === '') {
             continue;
           }
 
-          $img_url = $icon_path . strtolower($card) . '.png';
-          $icons .= '<img src="' . esc_url($img_url) . '" alt="' . esc_attr(ucwords($card)) . '" />';
+          $img_url = $icon_path . $card_slug . '.png';
+          $icons .= '<img src="' . esc_url($img_url) . '" alt="' . esc_attr(ucwords($card_slug)) . '" />';
         }
 
         if ($icons !== '') {
@@ -162,14 +172,17 @@ function woocommerce_plugnpay_ss2_init() {
         'authhash' => array(
           'title'       => __('Authorization Hash', 'woocommerce_plugnpay_ss2'),
           'type'        => 'checkbox',
-          'label'       => __('Enable Authorization Verification Hash. Strongly recommended for security. Must match your PlugnPay account settings.', 'woocommerce_plugnpay_ss2'),
-          'default'     => 'no',
+          'label'       => __('Required. Enable Authorization Verification Hash (SHA-256). Must be enabled in your PlugnPay account with a matching key.', 'woocommerce_plugnpay_ss2'),
+          'default'     => 'yes',
         ),
         'authhash_key' => array(
           'title'       => __('Authorization Hash Key', 'woocommerce_plugnpay_ss2'),
-          'type'        => 'text',
-          'description' => __('If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3]. Must configure your PlugnPay account to match.', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'password',
+          'description' => __('Required. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3]. Must match your PlugnPay account.', 'woocommerce_plugnpay_ss2'),
           'default'     => '',
+          'custom_attributes' => array(
+            'autocomplete' => 'new-password',
+          ),
         ),
         'authhash_fields' => array(
           'title'       => __('Authorization Hash Fields', 'woocommerce_plugnpay_ss2'),
@@ -181,6 +194,15 @@ function woocommerce_plugnpay_ss2_init() {
           ),
           'description' => __('Fieldset to use with authhash validation. Must configure your PlugnPay account to match.', 'woocommerce_plugnpay_ss2'),
           'default'     => '3',
+        ),
+        'response_hash_key' => array(
+          'title'       => __('Response Verification Hash Key', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'password',
+          'description' => __('Recommended. Leave blank to keep the current key. Used to verify pt_transaction_response_hash on callbacks. Configure Response Verification Hash in PlugnPay Security Administration.', 'woocommerce_plugnpay_ss2'),
+          'default'     => '',
+          'custom_attributes' => array(
+            'autocomplete' => 'new-password',
+          ),
         ),
         'giftcard_allow' => array(
           'title'   => __('Giftcard Acceptance', 'woocommerce_plugnpay_ss2'),
@@ -202,6 +224,97 @@ function woocommerce_plugnpay_ss2_init() {
       );
     }
 
+    /**
+     * Do not echo stored secrets back into the admin HTML.
+     */
+    public function generate_password_html($key, $data) {
+      $field_key = $this->get_field_key($key);
+      $data = wp_parse_args(
+        $data,
+        array(
+          'title'             => '',
+          'disabled'          => false,
+          'class'             => '',
+          'css'               => '',
+          'placeholder'       => '',
+          'desc_tip'          => false,
+          'description'       => '',
+          'custom_attributes' => array(),
+        )
+      );
+
+      $custom_attributes = array();
+      if (!empty($data['custom_attributes']) && is_array($data['custom_attributes'])) {
+        foreach ($data['custom_attributes'] as $attribute => $attribute_value) {
+          $custom_attributes[] = esc_attr($attribute) . '="' . esc_attr($attribute_value) . '"';
+        }
+      }
+
+      $has_value = $this->get_option($key) !== '';
+
+      ob_start();
+      ?>
+      <tr valign="top">
+        <th scope="row" class="titledesc">
+          <label for="<?php echo esc_attr($field_key); ?>"><?php echo wp_kses_post($data['title']); ?></label>
+        </th>
+        <td class="forminp">
+          <fieldset>
+            <legend class="screen-reader-text"><span><?php echo wp_kses_post($data['title']); ?></span></legend>
+            <input
+              class="input-text regular-input <?php echo esc_attr($data['class']); ?>"
+              type="password"
+              name="<?php echo esc_attr($field_key); ?>"
+              id="<?php echo esc_attr($field_key); ?>"
+              style="<?php echo esc_attr($data['css']); ?>"
+              value=""
+              placeholder="<?php echo $has_value ? esc_attr__('(unchanged)', 'woocommerce_plugnpay_ss2') : ''; ?>"
+              <?php echo implode(' ', $custom_attributes); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+              <?php disabled($data['disabled']); ?>
+            />
+            <?php echo $this->get_description_html($data); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+          </fieldset>
+        </td>
+      </tr>
+      <?php
+      return ob_get_clean();
+    }
+
+    public function validate_authhash_key_field($key, $value) {
+      return $this->persist_encrypted_secret($key, $value);
+    }
+
+    public function validate_response_hash_key_field($key, $value) {
+      return $this->persist_encrypted_secret($key, $value);
+    }
+
+    /**
+     * Keep the stored secret when the password field is submitted empty.
+     * Encrypt new values. Migrate legacy plaintext on save.
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @return string
+     */
+    private function persist_encrypted_secret($key, $value) {
+      $value = is_string($value) ? trim(wp_unslash($value)) : '';
+
+      if ($value !== '') {
+        return plugnpay_ss2_encrypt_secret($value);
+      }
+
+      $existing = $this->get_option($key);
+      if ($existing === '') {
+        return '';
+      }
+
+      if (plugnpay_ss2_is_encrypted_secret($existing)) {
+        return $existing;
+      }
+
+      return plugnpay_ss2_encrypt_secret($existing);
+    }
+
     public function admin_options() {
       echo '<h3>' . esc_html__('PlugnPay SSv2 Payment Gateway', 'woocommerce_plugnpay_ss2') . '</h3>';
       echo '<p>' . esc_html__('PlugnPay is a popular payment gateway for online payment processing.', 'woocommerce_plugnpay_ss2') . '</p>';
@@ -210,9 +323,39 @@ function woocommerce_plugnpay_ss2_init() {
       echo '</table>';
     }
 
+    public function admin_security_notices() {
+      if ($this->get_option('enabled') !== 'yes' || !current_user_can('manage_woocommerce')) {
+        return;
+      }
+
+      if (!$this->is_authhash_configured()) {
+        echo '<div class="error"><p>';
+        echo esc_html__('PlugnPay SSv2: Authorization Verification Hash and key are required before checkout can proceed. Enable the matching settings in PlugnPay Merchant Admin → Security Administration.', 'woocommerce_plugnpay_ss2');
+        echo '</p></div>';
+      }
+
+      if ($this->get_plain_secret('response_hash_key') === '') {
+        echo '<div class="notice notice-warning"><p>';
+        echo esc_html__('PlugnPay SSv2: Response Verification Hash key is not set. Callbacks still require PlugnPay server IPs; adding the response hash key is recommended.', 'woocommerce_plugnpay_ss2');
+        echo '</p></div>';
+      }
+
+      if (!$this->storefront_is_secure()) {
+        echo '<div class="error"><p>';
+        echo esc_html__('PlugnPay SSv2: HTTPS is required on the storefront for checkout and payment return URLs.', 'woocommerce_plugnpay_ss2');
+        echo '</p></div>';
+      }
+
+      if (version_compare(PHP_VERSION, '8.2', '<')) {
+        echo '<div class="notice notice-warning"><p>';
+        echo esc_html__('PlugnPay SSv2: PHP 8.2 or higher is recommended. PHP 8.1 is past vendor security support.', 'woocommerce_plugnpay_ss2');
+        echo '</p></div>';
+      }
+    }
+
     public function payment_fields() {
       if ($this->description) {
-        echo '<div class="plugnpay-ss2-description">' . wpautop(wptexturize($this->description)) . '</div>';
+        echo '<div class="plugnpay-ss2-description">' . wp_kses_post(wpautop(wptexturize($this->description))) . '</div>';
       }
     }
 
@@ -229,7 +372,7 @@ function woocommerce_plugnpay_ss2_init() {
       }
 
       echo '<p>' . esc_html__('Thank you for your order, please click the button below to pay with PlugnPay.', 'woocommerce_plugnpay_ss2') . '</p>';
-      echo $this->generate_plugnpay_form($order);
+      echo $this->generate_plugnpay_form($order); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     }
 
     public function process_payment($order_id) {
@@ -245,6 +388,16 @@ function woocommerce_plugnpay_ss2_init() {
         return array('result' => 'failure');
       }
 
+      if (!$this->is_authhash_configured()) {
+        wc_add_notice(__('Payment gateway is not configured for Authorization Hash.', 'woocommerce_plugnpay_ss2'), 'error');
+        return array('result' => 'failure');
+      }
+
+      if (!$this->storefront_is_secure()) {
+        wc_add_notice(__('Secure HTTPS checkout is required.', 'woocommerce_plugnpay_ss2'), 'error');
+        return array('result' => 'failure');
+      }
+
       return array(
         'result'   => 'success',
         'redirect' => $order->get_checkout_payment_url(true),
@@ -252,11 +405,21 @@ function woocommerce_plugnpay_ss2_init() {
     }
 
     /**
-     * Handle the customer return from PlugnPay Smart Screens.
+     * Handle the PlugnPay Smart Screens server callback.
      *
-     * Callback signature verification is intentionally deferred to a future release.
+     * Only requests from published PlugnPay callback server IPs are accepted.
      */
     public function check_plugnpay_response() {
+      $source_ip = $this->get_callback_source_ip();
+
+      if (!plugnpay_ss2_is_allowed_callback_ip($source_ip)) {
+        $this->log_callback_event(
+          sprintf('Rejected Smart Screens callback from unauthorized IP: %s', $source_ip === '' ? 'unknown' : $source_ip)
+        );
+        status_header(403);
+        exit;
+      }
+
       if (empty($_POST)) {
         wp_safe_redirect(wc_get_checkout_url());
         exit;
@@ -272,7 +435,7 @@ function woocommerce_plugnpay_ss2_init() {
 
       $response_code   = isset($_POST['pi_response_code']) ? sanitize_text_field(wp_unslash($_POST['pi_response_code'])) : '';
       $response_status = isset($_POST['pi_response_status']) ? sanitize_text_field(wp_unslash($_POST['pi_response_status'])) : '';
-      $transaction_id  = isset($_REQUEST['pt_order_id']) ? sanitize_text_field(wp_unslash($_REQUEST['pt_order_id'])) : '';
+      $transaction_id  = isset($_POST['pt_order_id']) ? sanitize_text_field(wp_unslash($_POST['pt_order_id'])) : '';
 
       $this->msg['class']   = 'error';
       $this->msg['message'] = $this->settings['failed_message'];
@@ -287,29 +450,32 @@ function woocommerce_plugnpay_ss2_init() {
           $this->msg['message'] = $this->settings['success_message'];
         }
         elseif (in_array($order_status, array('pending', 'on-hold', 'failed'), true)) {
-          $order->payment_complete($transaction_id);
-          $order->add_order_note(
-            sprintf(
-              /* translators: %s: PlugnPay transaction reference */
-              __('PlugnPay payment successful. Ref Number/Transaction ID: %s', 'woocommerce_plugnpay_ss2'),
-              $transaction_id
-            )
-          );
-          $order->add_order_note($this->settings['success_message']);
-
-          if (WC()->cart) {
-            WC()->cart->empty_cart();
+          if (!$this->callback_matches_order($order, $transaction_id)) {
+            $this->fail_unpaid_order($order);
           }
+          else {
+            $order->payment_complete($transaction_id);
+            $order->add_order_note(
+              sprintf(
+                /* translators: %s: PlugnPay transaction reference */
+                __('PlugnPay payment successful. Ref Number/Transaction ID: %s', 'woocommerce_plugnpay_ss2'),
+                $transaction_id
+              )
+            );
+            $order->add_order_note($this->settings['success_message']);
 
-          $payment_success      = true;
-          $this->msg['class']   = 'success';
-          $this->msg['message'] = $this->settings['success_message'];
+            if (WC()->cart) {
+              WC()->cart->empty_cart();
+            }
+
+            $payment_success      = true;
+            $this->msg['class']   = 'success';
+            $this->msg['message'] = $this->settings['success_message'];
+          }
         }
       }
       else {
-        if (!in_array($order->get_status(), array('processing', 'completed'), true)) {
-          $order->update_status('failed', $this->settings['failed_message']);
-        }
+        $this->fail_unpaid_order($order);
       }
 
       if ($payment_success) {
@@ -324,17 +490,127 @@ function woocommerce_plugnpay_ss2_init() {
     }
 
     /**
+     * Connecting IP for callback allowlisting.
+     *
+     * Uses REMOTE_ADDR only. Do not trust client-supplied forwarding headers.
+     *
+     * @return string
+     */
+    private function get_callback_source_ip() {
+      $ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '';
+
+      return apply_filters('woocommerce_plugnpay_ss2_callback_source_ip', $ip);
+    }
+
+    /**
+     * @param string $message
+     */
+    private function log_callback_event($message) {
+      if (!function_exists('wc_get_logger')) {
+        return;
+      }
+
+      wc_get_logger()->warning($message, array('source' => 'plugnpay-ss2'));
+    }
+
+    /**
+     * Validate payment method, amount, currency, and optional response hash.
+     *
+     * @param WC_Order $order
+     * @param string   $transaction_id
+     * @return bool
+     */
+    private function callback_matches_order($order, $transaction_id) {
+      if ($order->get_payment_method() !== $this->id) {
+        $this->log_callback_event('Rejected callback: payment method mismatch for order ' . $order->get_id());
+        return false;
+      }
+
+      $posted_amount = isset($_POST['pt_transaction_amount']) ? sanitize_text_field(wp_unslash($_POST['pt_transaction_amount'])) : '';
+      if (!plugnpay_ss2_amounts_match($posted_amount, $this->get_order_amount($order))) {
+        $this->log_callback_event('Rejected callback: amount mismatch for order ' . $order->get_id());
+        return false;
+      }
+
+      $posted_currency = isset($_POST['pt_currency']) ? sanitize_text_field(wp_unslash($_POST['pt_currency'])) : '';
+      if (!plugnpay_ss2_currencies_match($posted_currency, $order->get_currency())) {
+        $this->log_callback_event('Rejected callback: currency mismatch for order ' . $order->get_id());
+        return false;
+      }
+
+      $response_key = $this->get_plain_secret('response_hash_key');
+      if ($response_key !== '') {
+        $posted_hash = isset($_POST['pt_transaction_response_hash']) ? sanitize_text_field(wp_unslash($_POST['pt_transaction_response_hash'])) : '';
+        $publisher = isset($_POST['pt_gateway_account'])
+          ? strtolower(sanitize_text_field(wp_unslash($_POST['pt_gateway_account'])))
+          : strtolower((string) $this->settings['gateway_account']);
+        $hash_order_id = $transaction_id !== '' ? $transaction_id : (string) $order->get_id();
+
+        if (!plugnpay_ss2_response_hash_valid($posted_hash, $response_key, $publisher, $hash_order_id, plugnpay_ss2_format_amount($posted_amount))) {
+          $this->log_callback_event('Rejected callback: response hash mismatch for order ' . $order->get_id());
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    /**
+     * @param WC_Order $order
+     */
+    private function fail_unpaid_order($order) {
+      if (!in_array($order->get_status(), array('processing', 'completed'), true)) {
+        $order->update_status('failed', $this->settings['failed_message']);
+      }
+    }
+
+    /**
      * Format the order total for gateway submission.
      */
     private function get_order_amount($order) {
-      return wc_format_decimal($order->get_total(), 2);
+      return plugnpay_ss2_format_amount($order->get_total());
+    }
+
+    /**
+     * @param string $setting_key
+     * @return string
+     */
+    private function get_plain_secret($setting_key) {
+      $stored = isset($this->settings[$setting_key]) ? $this->settings[$setting_key] : '';
+      return plugnpay_ss2_decrypt_secret($stored);
+    }
+
+    /**
+     * @return bool
+     */
+    private function is_authhash_configured() {
+      return isset($this->settings['authhash'])
+        && $this->settings['authhash'] === 'yes'
+        && $this->get_plain_secret('authhash_key') !== '';
+    }
+
+    /**
+     * HTTPS is required except on local/development environments.
+     *
+     * @return bool
+     */
+    private function storefront_is_secure() {
+      if (is_ssl()) {
+        return true;
+      }
+
+      if (function_exists('wp_get_environment_type') && in_array(wp_get_environment_type(), array('local', 'development'), true)) {
+        return true;
+      }
+
+      return false;
     }
 
     /**
      * Resolve the authhash key for the current order currency.
      */
     private function get_authhash_key_for_order($order, $gateway_account) {
-      $authhash_key = $this->settings['authhash_key'];
+      $authhash_key = $this->get_plain_secret('authhash_key');
 
       if ($this->settings['divert_currency'] !== 'yes' || strpos($authhash_key, ',') === false) {
         return $authhash_key;
@@ -368,6 +644,10 @@ function woocommerce_plugnpay_ss2_init() {
         return '<p>' . esc_html__('Invalid order.', 'woocommerce_plugnpay_ss2') . '</p>';
       }
 
+      if (!$this->is_authhash_configured()) {
+        return '<p>' . esc_html__('Payment gateway is not configured for Authorization Hash.', 'woocommerce_plugnpay_ss2') . '</p>';
+      }
+
       $order_id = $order->get_id();
       $gateway_account = $this->settings['gateway_account'];
       $currency_code = $order->get_currency();
@@ -390,7 +670,7 @@ function woocommerce_plugnpay_ss2_init() {
         }
       }
 
-      $success_url = add_query_arg(
+      $callback_url = add_query_arg(
         array(),
         WC()->api_request_url(get_class($this))
       );
@@ -404,7 +684,9 @@ function woocommerce_plugnpay_ss2_init() {
         'pt_order_classifier'             => $order_id,
         'pt_account_code_1'               => $order_id,
         'pb_transition_type'              => 'hidden',
-        'pb_success_url'                  => $success_url,
+        'pb_success_url'                  => $callback_url,
+        'pb_bad_card_url'                 => $callback_url,
+        'pb_problem_url'                  => $callback_url,
         'pd_collect_company'              => 'yes',
         'pt_billing_name'                 => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
         'pt_billing_company'              => $order->get_billing_company(),
@@ -429,24 +711,17 @@ function woocommerce_plugnpay_ss2_init() {
 
       $plugnpay_args['pb_post_auth'] = ($this->settings['post_auth'] === 'yes') ? 'yes' : 'no';
 
-      if ($this->settings['authhash'] === 'yes') {
-        if ($this->settings['authhash_fields'] === '3') {
-          $string_fields = $order_id . $order_amount . strtolower($gateway_account);
-        }
-        elseif ($this->settings['authhash_fields'] === '2') {
-          $string_fields = $order_amount . strtolower($gateway_account);
-        }
-        else {
-          $string_fields = strtolower($gateway_account);
-        }
-
-        $timestamp = gmdate('YmdHis', time());
-        $authhash_key = $this->get_authhash_key_for_order($order, $gateway_account);
-        $hash_string = $authhash_key . $timestamp . $string_fields;
-
-        $plugnpay_args['pt_transaction_hash'] = md5($hash_string);
-        $plugnpay_args['pt_transaction_time'] = $timestamp;
-      }
+      $string_fields = plugnpay_ss2_authhash_string_fields(
+        $this->settings['authhash_fields'],
+        $order_id,
+        $order_amount,
+        $gateway_account
+      );
+      $timestamp = gmdate('YmdHis', time());
+      $authhash_key = $this->get_authhash_key_for_order($order, $gateway_account);
+      $hash_string = $authhash_key . $timestamp . $string_fields;
+      $plugnpay_args['pt_transaction_hash'] = plugnpay_ss2_transaction_hash($hash_string);
+      $plugnpay_args['pt_transaction_time'] = $timestamp;
 
       if ($this->settings['giftcard_allow'] === 'yes') {
         $plugnpay_args['pd_transaction_payment_type'] = 'mpgiftcard';
@@ -507,11 +782,17 @@ function woocommerce_plugnpay_ss2_version_notice() {
   echo '</p></div>';
 }
 
+function woocommerce_plugnpay_ss2_php_notice() {
+  echo '<div class="error"><p>';
+  echo esc_html__('PlugnPay SSv2 requires PHP 8.1 or higher.', 'woocommerce_plugnpay_ss2');
+  echo '</p></div>';
+}
+
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'plugnpay_ss2_action_links');
 
 function plugnpay_ss2_action_links($links) {
   $gateway_links = array(
-    '<a href="http://www.gatewaystatus.com/" target="_blank" rel="noopener noreferrer">' . esc_html__('Gateway Status', 'woocommerce_plugnpay_ss2') . '</a>',
+    '<a href="https://www.gatewaystatus.com/" target="_blank" rel="noopener noreferrer">' . esc_html__('Gateway Status', 'woocommerce_plugnpay_ss2') . '</a>',
     '<a href="https://helpdesk.plugnpay.com/" target="_blank" rel="noopener noreferrer">' . esc_html__('Online Helpdesk', 'woocommerce_plugnpay_ss2') . '</a>',
     '<a href="https://pay1.plugnpay.com/admin/" target="_blank" rel="noopener noreferrer">' . esc_html__('Merchant Admin', 'woocommerce_plugnpay_ss2') . '</a>',
   );
