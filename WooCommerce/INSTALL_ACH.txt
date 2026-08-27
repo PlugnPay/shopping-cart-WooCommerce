@@ -1,6 +1,6 @@
 ====================================================
 PlugnPay API ACH/eCheck Module
-Payment Module for WooCommerce — module v1.2.0
+Payment Module for WooCommerce — module v1.2.1 (2026-08-27)
 ====================================================
 
 ***** IMPORTANT NOTES *****
@@ -10,7 +10,7 @@ will be given to help diagnose/address problems with this module.
 Requirements:
   - WordPress 6.0+
   - WooCommerce 8.0+
-  - PHP 8.1+ (PHP 8.2+ recommended)
+  - PHP 8.2+ (PHP 8.3+ recommended)
   - HTTPS on the storefront (required for checkout)
   - PHP cURL
 
@@ -18,7 +18,7 @@ This module requires SSL and PHP cURL. WooCommerce collects ACH/eCheck
 information on your store's checkout pages. Authorization is performed
 via PlugnPay's Remote API.
 
-Authorization Verification Hash (SHA-256) is required. Enable it in
+Authorization Verification Hash (SHA-256) is recommended. Enable it in
 this module and in PlugnPay Merchant Admin → Security Administration.
 
 PCI / compliance: Collecting bank account data onsite increases your
@@ -32,7 +32,7 @@ Use classic checkout if Blocks causes problems.
 To Install:
 
 1. Preferred: In WordPress → Plugins → Add New → Upload Plugin,
-   upload woocommerce_api_ach_module.zip.
+   upload woocommerce_api_ach_module_1.2.1_20260827.zip.
 
    Or unzip into wp-content/plugins/ so you have:
      wp-content/plugins/plugnpay-api-ach-payment-gateway-for-woocommerce/...
@@ -46,11 +46,11 @@ To Install:
 3. WooCommerce → Settings → Payments → enable and configure:
    - Gateway Account
    - Remote Client Password (required)
-   - Authorization Hash (required, SHA-256)
-   - Authorization Hash Key (required)
+   - Authorization Hash (recommended, SHA-256)
+   - Authorization Hash Key (when hash is enabled)
 
-   Matching Authorization Hash settings must be enabled in PlugnPay
-   Merchant Admin.
+   If Authorization Hash is enabled, matching settings must be enabled in
+   PlugnPay Merchant Admin.
 
 See the package overview:
   WooCommerce/README.md

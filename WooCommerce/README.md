@@ -1,6 +1,6 @@
 # WooCommerce — PlugnPay Payment Modules
 
-Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.2.1 (2026-08-27)**, API ACH **v1.2.0**, API CC Tokenization **v1.1.0**, Smart Screens v2 **v1.1.11**.
+Payment modules for WooCommerce (classic checkout). Current versions: API Credit Card **v1.2.2 (2026-08-27)**, API ACH **v1.2.1 (2026-08-27)**, API CC Tokenization **v1.1.1 (2026-08-27)**, Smart Screens v2 **v1.1.12 (2026-08-27)**.
 
 Install through WordPress → Plugins → Upload Plugin, then configure under WooCommerce → Settings → Payments.
 
@@ -11,7 +11,7 @@ Install through WordPress → Plugins → Upload Plugin, then configure under Wo
 | | |
 |---|---|
 | Package folder | `plugnpay-api-cc-payment-gateway-for-woocommerce` |
-| Download | [woocommerce_api_cc_module_1.2.1_20260827.zip](./woocommerce_api_cc_module_1.2.1_20260827.zip) |
+| Download | [woocommerce_api_cc_module_1.2.2_20260827.zip](./woocommerce_api_cc_module_1.2.2_20260827.zip) |
 | Checkout | Onsite card fields → Remote API |
 | Card/bank data on your server | Yes |
 | PCI scope | Higher |
@@ -22,7 +22,7 @@ Install through WordPress → Plugins → Upload Plugin, then configure under Wo
 | | |
 |---|---|
 | Package folder | `plugnpay-api-ach-payment-gateway-for-woocommerce` |
-| Download | [woocommerce_api_ach_module.zip](./woocommerce_api_ach_module.zip) |
+| Download | [woocommerce_api_ach_module_1.2.1_20260827.zip](./woocommerce_api_ach_module_1.2.1_20260827.zip) |
 | Checkout | Onsite ACH fields → Remote API |
 | Card/bank data on your server | Yes |
 | PCI scope | Higher |
@@ -33,7 +33,7 @@ Install through WordPress → Plugins → Upload Plugin, then configure under Wo
 | | |
 |---|---|
 | Package folder | `plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce` |
-| Download | [woocommerce_api_cc_tokenization_module.zip](./woocommerce_api_cc_tokenization_module.zip) |
+| Download | [woocommerce_api_cc_tokenization_module_1.1.1_20260827.zip](./woocommerce_api_cc_tokenization_module_1.1.1_20260827.zip) |
 | Checkout | Onsite card fields + saved cards → Remote API / authprev |
 | Card/bank data on your server | Yes (new card); saved cards use authprev |
 | PCI scope | Higher |
@@ -44,7 +44,7 @@ Install through WordPress → Plugins → Upload Plugin, then configure under Wo
 | | |
 |---|---|
 | Package folder | `plugnpay-ss2-payment-gateway-for-woocommerce` |
-| Download | [woocommerce_ss2_module.zip](./woocommerce_ss2_module.zip) |
+| Download | [woocommerce_ss2_module_1.1.12_20260827.zip](./woocommerce_ss2_module_1.1.12_20260827.zip) |
 | Checkout | Redirect → `https://pay1.plugnpay.com/pay/` |
 | Card/bank data on your server | No |
 | PCI scope | Lower |
@@ -57,22 +57,22 @@ You may install more than one module; enable only the payment method(s) you need
 - Source: [src/plugnpay-api-cc-payment-gateway-for-woocommerce/](./src/plugnpay-api-cc-payment-gateway-for-woocommerce/)
 - Quick install: [INSTALL.txt](./INSTALL.txt)
 
-Collects card data on your storefront and posts from the server to PlugnPay Remote API. HTTPS and Authorization Verification Hash (SHA-256) are required. Optional gift card split-payment fields when enabled in settings.
+Collects card data on your storefront and posts from the server to PlugnPay Remote API. HTTPS is required. Authorization Verification Hash (SHA-256) is recommended. Optional gift card split-payment fields when enabled in settings.
 
 ## API ACH/eCheck (onsite)
 
 - Source: [src/plugnpay-api-ach-payment-gateway-for-woocommerce/](./src/plugnpay-api-ach-payment-gateway-for-woocommerce/)
 - Quick install: [INSTALL_ACH.txt](./INSTALL_ACH.txt)
 
-Collects ACH/eCheck data on your storefront and posts from the server to PlugnPay Remote API. HTTPS and Authorization Verification Hash (SHA-256) are required.
+Collects ACH/eCheck data on your storefront and posts from the server to PlugnPay Remote API. HTTPS is required. Authorization Verification Hash (SHA-256) is recommended.
 
 ## API Credit Card Tokenization (onsite + card on file)
 
 - Source: [src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/](./src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/)
 - Quick install: [INSTALL_TOKENIZATION.txt](./INSTALL_TOKENIZATION.txt)
-- Version: **v1.1.0**
+- Version: **v1.1.1 (2026-08-27)**
 
-Collects card data on your storefront for new cards. HTTPS and Authorization Verification Hash (SHA-256) are required. Behavior:
+Collects card data on your storefront for new cards. HTTPS is required. Authorization Verification Hash (SHA-256) is recommended. Behavior:
 
 | Flow | Remote API |
 |---|---|
@@ -89,7 +89,7 @@ Tokens are strictly bound to the PlugnPay account that created them (including w
 - Source: [src/plugnpay-ss2-payment-gateway-for-woocommerce/](./src/plugnpay-ss2-payment-gateway-for-woocommerce/)
 - Quick install: [INSTALL_SS2.txt](./INSTALL_SS2.txt)
 
-Redirects customers to PlugnPay hosted Smart Screens. WooCommerce does not collect sensitive payment data. HTTPS and Authorization Verification Hash (SHA-256) are required. Capture / void / refund are done in PlugnPay Merchant Admin when applicable.
+Redirects customers to PlugnPay hosted Smart Screens. WooCommerce does not collect sensitive payment data. HTTPS is required. Authorization Verification Hash (SHA-256) is very highly recommended. Capture / void / refund are done in PlugnPay Merchant Admin when applicable.
 
 ## Common install steps (all)
 
@@ -111,10 +111,10 @@ WooCommerce/
   INSTALL_ACH.txt             # API ACH quick install
   INSTALL_TOKENIZATION.txt    # API CC Tokenization quick install
   INSTALL_SS2.txt             # Smart Screens v2 quick install
-  woocommerce_api_cc_module_1.2.1_20260827.zip
-  woocommerce_api_ach_module.zip
-  woocommerce_api_cc_tokenization_module.zip
-  woocommerce_ss2_module.zip
+  woocommerce_api_cc_module_1.2.2_20260827.zip
+  woocommerce_api_ach_module_1.2.1_20260827.zip
+  woocommerce_api_cc_tokenization_module_1.1.1_20260827.zip
+  woocommerce_ss2_module_1.1.12_20260827.zip
   README.md
   src/
     plugnpay-api-cc-payment-gateway-for-woocommerce/
@@ -126,8 +126,8 @@ WooCommerce/
 Rebuild a merchant zip from source (run from `WooCommerce/src/`):
 
 ```bash
-zip -r ../woocommerce_api_cc_module_1.2.1_20260827.zip plugnpay-api-cc-payment-gateway-for-woocommerce
-zip -r ../woocommerce_api_ach_module.zip plugnpay-api-ach-payment-gateway-for-woocommerce
-zip -r ../woocommerce_api_cc_tokenization_module.zip plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce
-zip -r ../woocommerce_ss2_module.zip plugnpay-ss2-payment-gateway-for-woocommerce
+zip -r ../woocommerce_api_cc_module_1.2.2_20260827.zip plugnpay-api-cc-payment-gateway-for-woocommerce
+zip -r ../woocommerce_api_ach_module_1.2.1_20260827.zip plugnpay-api-ach-payment-gateway-for-woocommerce
+zip -r ../woocommerce_api_cc_tokenization_module_1.1.1_20260827.zip plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce
+zip -r ../woocommerce_ss2_module_1.1.12_20260827.zip plugnpay-ss2-payment-gateway-for-woocommerce
 ```

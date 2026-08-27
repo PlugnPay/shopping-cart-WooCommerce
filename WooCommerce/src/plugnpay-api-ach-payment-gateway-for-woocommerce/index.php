@@ -3,12 +3,12 @@
  * Plugin Name: PlugnPay API ACH/eCheck Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process API ACH/eCheck Payments with PlugnPay gateway.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: PlugnPay
  * Author URI: https://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_ach
  * Requires at least: 6.0
- * Requires PHP: 8.1
+ * Requires PHP: 8.2
  * Requires Plugins: woocommerce
  * License: GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.txt
@@ -17,6 +17,7 @@
 defined('ABSPATH') || exit;
 
 require_once __DIR__ . '/includes/pci.php';
+require_once __DIR__ . '/includes/admin-ui.php';
 
 add_action('before_woocommerce_init', 'woocommerce_plugnpay_api_ach_declare_compatibility');
 
@@ -35,7 +36,7 @@ function woocommerce_plugnpay_api_ach_init() {
     return;
   }
 
-  if (version_compare(PHP_VERSION, '8.1', '<')) {
+  if (version_compare(PHP_VERSION, plugnpay_api_ach_minimum_php_version(), '<')) {
     add_action('admin_notices', 'woocommerce_plugnpay_api_ach_php_notice');
     return;
   }
@@ -70,6 +71,7 @@ function woocommerce_plugnpay_api_ach_init() {
       }
 
       add_action('wp_enqueue_scripts', array($this, 'enqueue_checkout_styles'));
+      add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
       add_action('admin_notices', array($this, 'admin_security_notices'));
     }
 
@@ -85,79 +87,177 @@ function woocommerce_plugnpay_api_ach_init() {
         'plugnpay-api-ach-checkout',
         plugins_url('assets/css/checkout.css', __FILE__),
         array(),
-        '1.2.0'
+        '1.2.1'
+      );
+    }
+
+    /**
+     * Section headings and show/hide for dependent gateway settings.
+     *
+     * @param string $hook
+     */
+    public function enqueue_admin_assets($hook) {
+      if ($hook !== 'woocommerce_page_wc-settings') {
+        return;
+      }
+
+      $tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : '';
+      $section = isset($_GET['section']) ? sanitize_text_field(wp_unslash($_GET['section'])) : '';
+      if ($tab !== 'checkout' || $section !== $this->id) {
+        return;
+      }
+
+      wp_enqueue_style(
+        'plugnpay-api-ach-admin-settings',
+        plugins_url('assets/css/admin-settings.css', __FILE__),
+        array(),
+        '1.2.1'
+      );
+      wp_enqueue_script(
+        'plugnpay-api-ach-admin-settings',
+        plugins_url('assets/js/admin-settings.js', __FILE__),
+        array('jquery'),
+        '1.2.1',
+        true
+      );
+      wp_localize_script(
+        'plugnpay-api-ach-admin-settings',
+        'plugnpayApiAchAdmin',
+        array(
+          'gatewayId'       => $this->id,
+          'dependentFields' => plugnpay_api_ach_admin_dependent_fields(),
+        )
       );
     }
 
     function init_form_fields() {
       $this->form_fields = array(
-          'enabled'         => array(
-              'title'          => __('Enable/Disable', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'checkbox',
-              'label'          => __('Enable PlugnPay API ACH Payment Module.', 'woocommerce_plugnpay_api_ach'),
-              'default'        => 'no'),
-          'title'           => array(
-              'title'          => __('Title:', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'text',
-              'description'    => __('This controls the title which the user sees during checkout.', 'woocommerce_plugnpay_api_ach'),
-              'default'        => __('Checking Account', 'woocommerce_plugnpay_api_ach')),
-          'description'     => array(
-              'title'          => __('Description:', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'textarea',
-              'description'    => __('This controls the description which the user sees during checkout.', 'woocommerce_plugnpay_api_ach'),
-              'default'        => __('Pay securely by Checking Account through PlugnPay Secure Servers.', 'woocommerce_plugnpay_api_ach')),
-          'gateway_account' => array(
-              'title'          => __('Gateway Account', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'text',
-              'description'    => __('Username issued by PlugnPay at time of sign up.', 'woocommerce_plugnpay_api_ach')),
-          'remote_password' => array(
-              'title'          => __('Remote Client Password', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'password',
-              'description'    => __('Leave blank to keep the current password. Created in PlugnPay Security Administration.', 'woocommerce_plugnpay_api_ach'),
-              'custom_attributes' => array('autocomplete' => 'new-password')),
-          'success_message' => array(
-              'title'          => __('Transaction Success Message', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'textarea',
-              'description'    => __('Message to be displayed on successful transaction.', 'woocommerce_plugnpay_api_ach'),
-              'default'        => __('Your payment has been processed successfully.', 'woocommerce_plugnpay_api_ach')),
-          'failed_message'  => array(
-              'title'          => __('Transaction Failed Message', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'textarea',
-              'description'    => __('Message to be displayed on failed transaction.', 'woocommerce_plugnpay_api_ach'),
-              'default'        => __('Your transaction has been declined.', 'woocommerce_plugnpay_api_ach')),
-          'post_auth'       => array(
-              'title'          => __('Transaction Settlement', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'select',
-              'options'        => array('yes'=>'Authorize and Settle', 'no'=>'Authorize Only'),
-              'description'    => __('Transaction Settlement. If you are not sure what to use set to Authorize and Settle.', 'woocommerce_plugnpay_api_ach')),
-          'authhash'        => array(
-              'title'          => __('Authorization Hash', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'checkbox',
-              'label'          => __('Required. Enable Authorization Verification Hash (SHA-256). Must be enabled in your PlugnPay account with a matching key.', 'woocommerce_plugnpay_api_ach'),
-              'default'        => 'yes'),
-          'authhash_key'    => array(
-             'title'           => __('Authorization Hash Key', 'woocommerce_plugnpay_api_ach'),
-             'type'            => 'password',
-             'description'     => __('Required. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3]. Must match your PlugnPay account.', 'woocommerce_plugnpay_api_ach'),
-             'default'         => '',
-             'custom_attributes' => array('autocomplete' => 'new-password')),
-          'authhash_fields' => array(
-             'title'           => __('Authorization Hash Fields', 'woocommerce_plugnpay_api_ach'),
-             'type'            => 'select',
-             'options'         => array( '1'=>'publisher-name', '2'=>'card-amount,publisher-name', '3'=>'acct_code,card-amount,publisher-name'),
-             'description'     => __('Fieldset to use with authhash validation. [Must configure your PlugnPay account to match]', 'woocommerce_plugnpay_api_ach'),
-             'default'         => '3'),
-           'divert_currency' => array(
-              'title'          => __('Divert Currency', 'woocommerce_plugnpay_api_ach'),
-              'type'           => 'checkbox',
-              'label'          => __('Enable Divert Currency', 'woocommerce_plugnpay_api_ach'),
-              'description'    => __('Enable to divert currency to alt account. [Multiple gateway accounts required, each setup for a different currency.]', 'woocommerce_plugnpay_api_ach'),
-              'default'        => 'no'),
-           'divert_accounts'  => array(
-             'title'           => __('Diverted Accounts', 'woocommerce_plugnpay_api_ach'),
-             'type'            => 'text',
-             'description'     => __('List currency code, username & Remote Client Password to divert specific payments to.<br>[i.e. USD:username1:abcd1234,BBD:username2:efgh2345,CAD:username3:ijkl3456]<br>Legacy two-part entries (USD:username) use the default Remote Client Password.<br>Currency codes not listed will use default Gateway Account.', 'woocommerce_plugnpay_api_ach')),
-       );
+        'section_checkout' => array(
+          'title'       => __('Checkout display', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-api-ach-settings-section plugnpay-api-ach-settings-section-first',
+          'description' => __('How this payment method appears on the checkout page.', 'woocommerce_plugnpay_api_ach'),
+        ),
+        'enabled' => array(
+          'title'   => __('Enable/Disable', 'woocommerce_plugnpay_api_ach'),
+          'type'    => 'checkbox',
+          'label'   => __('Enable PlugnPay API ACH Payment Module.', 'woocommerce_plugnpay_api_ach'),
+          'default' => 'no',
+        ),
+        'title' => array(
+          'title'       => __('Title:', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'text',
+          'description' => __('This controls the title which the user sees during checkout.', 'woocommerce_plugnpay_api_ach'),
+          'default'     => __('Checking Account', 'woocommerce_plugnpay_api_ach'),
+          'desc_tip'    => true,
+        ),
+        'description' => array(
+          'title'       => __('Description:', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'textarea',
+          'description' => __('This controls the description which the user sees during checkout.', 'woocommerce_plugnpay_api_ach'),
+          'default'     => __('Pay securely by Checking Account through PlugnPay Secure Servers.', 'woocommerce_plugnpay_api_ach'),
+          'desc_tip'    => true,
+        ),
+        'section_gateway' => array(
+          'title'       => __('Gateway account', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-api-ach-settings-section',
+          'description' => __('PlugnPay account used for this store, Remote Client Password, and how approved payments are captured.', 'woocommerce_plugnpay_api_ach'),
+        ),
+        'gateway_account' => array(
+          'title'       => __('Gateway Account', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'text',
+          'description' => __('Username issued by PlugnPay at time of sign up.', 'woocommerce_plugnpay_api_ach'),
+        ),
+        'remote_password' => array(
+          'title'       => __('Remote Client Password', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'password',
+          'description' => __('Required. Leave blank to keep the current password. Created in PlugnPay Security Administration.', 'woocommerce_plugnpay_api_ach'),
+          'custom_attributes' => array(
+            'autocomplete' => 'new-password',
+          ),
+        ),
+        'post_auth' => array(
+          'title'       => __('Transaction Settlement', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'select',
+          'options'     => array(
+            'yes' => __('Authorize and Settle', 'woocommerce_plugnpay_api_ach'),
+            'no'  => __('Authorize Only', 'woocommerce_plugnpay_api_ach'),
+          ),
+          'description' => __('If you are not sure what to use, set to Authorize and Settle.', 'woocommerce_plugnpay_api_ach'),
+          'desc_tip'    => true,
+        ),
+        'section_messages' => array(
+          'title'       => __('Customer messages', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-api-ach-settings-section',
+          'description' => __('Shown to the shopper after payment succeeds or fails.', 'woocommerce_plugnpay_api_ach'),
+        ),
+        'success_message' => array(
+          'title'       => __('Transaction Success Message', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'textarea',
+          'description' => __('Message to be displayed on successful transaction.', 'woocommerce_plugnpay_api_ach'),
+          'default'     => __('Your payment has been processed successfully.', 'woocommerce_plugnpay_api_ach'),
+          'desc_tip'    => true,
+        ),
+        'failed_message' => array(
+          'title'       => __('Transaction Failed Message', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'textarea',
+          'description' => __('Message to be displayed on failed transaction.', 'woocommerce_plugnpay_api_ach'),
+          'default'     => __('Your transaction has been declined.', 'woocommerce_plugnpay_api_ach'),
+          'desc_tip'    => true,
+        ),
+        'section_authhash' => array(
+          'title'       => __('Authorization Verification Hash (SHA-256)', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-api-ach-settings-section',
+          'description' => __('Recommended. Enable this in both the module and PlugnPay Merchant Admin → Security Administration. The key and fieldset must match.', 'woocommerce_plugnpay_api_ach'),
+        ),
+        'authhash' => array(
+          'title'       => __('Authorization Hash', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'checkbox',
+          'label'       => __('Enable Authorization Verification Hash (SHA-256). Recommended.', 'woocommerce_plugnpay_api_ach'),
+          'default'     => 'yes',
+        ),
+        'authhash_key' => array(
+          'title'       => __('Authorization Hash Key', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'password',
+          'description' => __('Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].', 'woocommerce_plugnpay_api_ach'),
+          'default'     => '',
+          'custom_attributes' => array(
+            'autocomplete' => 'new-password',
+          ),
+        ),
+        'authhash_fields' => array(
+          'title'       => __('Authorization Hash Fields', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'select',
+          'options'     => array(
+            '1' => 'publisher-name',
+            '2' => 'card-amount,publisher-name',
+            '3' => 'acct_code,card-amount,publisher-name',
+          ),
+          'description' => __('Fieldset to use with authhash validation. Must configure your PlugnPay account to match.', 'woocommerce_plugnpay_api_ach'),
+          'default'     => '3',
+          'desc_tip'    => true,
+        ),
+        'section_optional' => array(
+          'title'       => __('Optional features', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-api-ach-settings-section',
+          'description' => __('Currency diversion requires matching PlugnPay account features. Multiple gateway accounts are required, each set up for a different currency.', 'woocommerce_plugnpay_api_ach'),
+        ),
+        'divert_currency' => array(
+          'title'   => __('Divert Currency', 'woocommerce_plugnpay_api_ach'),
+          'type'    => 'checkbox',
+          'label'   => __('Enable to divert payments for specific currencies to another gateway account.', 'woocommerce_plugnpay_api_ach'),
+          'default' => 'no',
+        ),
+        'divert_accounts' => array(
+          'title'       => __('Diverted Accounts', 'woocommerce_plugnpay_api_ach'),
+          'type'        => 'text',
+          'description' => __('List currency code, username & Remote Client Password to divert specific payments to.<br>[i.e. USD:username1:abcd1234,BBD:username2:efgh2345,CAD:username3:ijkl3456]<br>Legacy two-part entries (USD:username) use the default Remote Client Password.<br>Currency codes not listed will use default Gateway Account.', 'woocommerce_plugnpay_api_ach'),
+        ),
+      );
     }
 
     public function process_admin_options() {
@@ -205,15 +305,15 @@ function woocommerce_plugnpay_api_ach_init() {
       }
 
       if (!$this->is_authhash_configured()) {
-        echo '<div class="error"><p>' . esc_html__('PlugnPay API ACH: Authorization Verification Hash and key are required before checkout can proceed.', 'woocommerce_plugnpay_api_ach') . '</p></div>';
+        echo '<div class="notice notice-warning"><p>' . esc_html__('PlugnPay API ACH: Authorization Verification Hash (SHA-256) is recommended. Enable it here and in PlugnPay Security Administration with a matching key.', 'woocommerce_plugnpay_api_ach') . '</p></div>';
       }
 
       if (!plugnpay_pci_storefront_is_secure()) {
         echo '<div class="error"><p>' . esc_html__('PlugnPay API ACH: HTTPS is required on the storefront because bank account data is collected onsite.', 'woocommerce_plugnpay_api_ach') . '</p></div>';
       }
 
-      if (version_compare(PHP_VERSION, '8.2', '<')) {
-        echo '<div class="notice notice-warning"><p>' . esc_html__('PlugnPay API ACH: PHP 8.2 or higher is recommended.', 'woocommerce_plugnpay_api_ach') . '</p></div>';
+      if (version_compare(PHP_VERSION, '8.3', '<')) {
+        echo '<div class="notice notice-warning"><p>' . esc_html__('PlugnPay API ACH: PHP 8.3 or higher is recommended. PHP 8.2 security support ends 31 Dec 2026.', 'woocommerce_plugnpay_api_ach') . '</p></div>';
       }
     }
 
@@ -465,11 +565,6 @@ function woocommerce_plugnpay_api_ach_init() {
         return array('result' => 'failure');
       }
 
-      if (!$this->is_authhash_configured()) {
-        wc_add_notice(__('(Transaction Error) Payment gateway is not configured for Authorization Hash.', 'woocommerce_plugnpay_api_ach'), 'error');
-        return array('result' => 'failure');
-      }
-
       if (!plugnpay_pci_storefront_is_secure()) {
         wc_add_notice(__('(Transaction Error) Secure HTTPS checkout is required.', 'woocommerce_plugnpay_api_ach'), 'error');
         return array('result' => 'failure');
@@ -625,16 +720,18 @@ function woocommerce_plugnpay_api_ach_init() {
         $plugnpayapi_args['authtype'] = 'authonly';
       }
 
-      $timestamp = gmdate('YmdHis', time());
-      $authhash_key = $this->resolve_authhash_key($currencyCode);
-      $string_fields = plugnpay_pci_authhash_string_fields(
-        $this->settings['authhash_fields'],
-        $order_id,
-        $order_amount,
-        $gatewayAccount
-      );
-      $plugnpayapi_args['authhash'] = plugnpay_pci_authhash($authhash_key . $timestamp . $string_fields);
-      $plugnpayapi_args['transacttime'] = $timestamp;
+      if ($this->is_authhash_configured()) {
+        $timestamp = gmdate('YmdHis', time());
+        $authhash_key = $this->resolve_authhash_key($currencyCode);
+        $string_fields = plugnpay_pci_authhash_string_fields(
+          $this->settings['authhash_fields'],
+          $order_id,
+          $order_amount,
+          $gatewayAccount
+        );
+        $plugnpayapi_args['authhash'] = plugnpay_pci_authhash($authhash_key . $timestamp . $string_fields);
+        $plugnpayapi_args['transacttime'] = $timestamp;
+      }
 
       return $plugnpayapi_args;
     }
@@ -649,7 +746,7 @@ function woocommerce_plugnpay_api_ach_init() {
 }
 
 function woocommerce_plugnpay_api_ach_php_notice() {
-  echo '<div class="error"><p>' . esc_html__('PlugnPay API ACH requires PHP 8.1 or higher.', 'woocommerce_plugnpay_api_ach') . '</p></div>';
+  echo '<div class="error"><p>' . esc_html__('PlugnPay API ACH requires PHP 8.2 or higher.', 'woocommerce_plugnpay_api_ach') . '</p></div>';
 }
 
 function woocommerce_plugnpay_api_ach_version_notice() {

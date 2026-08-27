@@ -5,6 +5,7 @@
 
 $base = dirname(__DIR__);
 require $base . '/includes/pci.php';
+require $base . '/includes/admin-ui.php';
 
 $failed = 0;
 
@@ -59,6 +60,20 @@ plugnpay_pci_assert(plugnpay_pci_decrypt_secret('legacy-plaintext') === 'legacy-
 plugnpay_pci_assert(plugnpay_pci_encrypt_secret($encrypted) === $encrypted, 'do not double-encrypt');
 plugnpay_pci_assert(plugnpay_pci_persist_encrypted_secret($encrypted, '') === $encrypted, 'blank submit keeps ciphertext');
 plugnpay_pci_assert(plugnpay_pci_is_encrypted_secret(plugnpay_pci_persist_encrypted_secret('legacy', '')), 'blank submit migrates plaintext');
+
+$dependent = plugnpay_api_ach_admin_dependent_fields();
+plugnpay_pci_assert(
+  isset($dependent['authhash']) && $dependent['authhash'] === array('authhash_key', 'authhash_fields'),
+  'auth hash fields depend on enable checkbox'
+);
+plugnpay_pci_assert(
+  isset($dependent['divert_currency']) && $dependent['divert_currency'] === array('divert_accounts'),
+  'divert accounts depend on divert checkbox'
+);
+plugnpay_pci_assert(plugnpay_api_ach_minimum_php_version() === '8.2', 'minimum PHP is 8.2');
+
+require dirname($base) . '/plugnpay-api-cc-payment-gateway-for-woocommerce/includes/pci.php';
+plugnpay_pci_assert(function_exists('plugnpay_pci_authhash'), 'pci helpers coexist with API CC copy');
 
 echo $failed === 0 ? "\nAll tests passed.\n" : "\n{$failed} test(s) failed.\n";
 exit($failed === 0 ? 0 : 1);

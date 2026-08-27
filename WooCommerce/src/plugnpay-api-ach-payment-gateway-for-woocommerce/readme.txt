@@ -5,8 +5,8 @@ Site link: https://www.plugnpay.com
 Tags: woocommerce, plugnpay, payment, gateway, API, ACH, eCheck, checking, savings
 Requires at least: 6.0
 Tested up to: 6.8
-Requires PHP: 8.1
-Stable tag: 1.2.0
+Requires PHP: 8.2
+Stable tag: 1.2.1
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -18,7 +18,7 @@ PlugnPay API ACH/eCheck Payment Gateway for WooCommerce makes your website ready
 
 PlugnPay is a widely used payment gateway to process payments online, including ACH/eCheck payments.
 
-Requires WordPress 6.0+, WooCommerce 8.0+, PHP 8.1+, and HTTPS on the storefront. Collecting bank account data onsite increases compliance scope versus hosted Smart Screens.
+Requires WordPress 6.0+, WooCommerce 8.0+, PHP 8.2+, and HTTPS on the storefront. Collecting bank account data onsite increases compliance scope versus hosted Smart Screens.
 
 WooCommerce 8.x Compatible (classic checkout). This module does not support WooCommerce Cart/Checkout Blocks.
 
@@ -29,7 +29,7 @@ Few features of this plugin:
 2. No redirecting to other URL.
 3. Easy to install and configure
 4. Option to configure success & failure message
-5. HTTPS required; Authorization Verification Hash (SHA-256) required
+5. HTTPS required; Authorization Verification Hash (SHA-256) recommended
 6. Remote Client Password and hash keys stored encrypted at rest
 7. Optional divert payments based upon currency selected
 
@@ -52,7 +52,7 @@ To configure this checkout option:
 9. Under 'Payment Gateways' you will find all the available gateways, select 'PlugnPay API ACH' option
 10. On this page you will find options to configure the plugin for use with WooCommerce
 11. Modify the configurable elements accordingly
-[* NOTE: At minimum, check the Enable checkbox & enter your username into the Gateway Account field and your Remote Client Password. All other fields are optional.]
+[* NOTE: At minimum, enable the gateway, enter Gateway Account and Remote Client Password. Authorization Hash (SHA-256) is recommended; enable it here and in PlugnPay Merchant Admin.]
 
 ---------------------------------------------
 Enable/Disable: Used to enable/disable this payment ability, once the plug-in itself has been activated.
@@ -71,9 +71,9 @@ Transaction Failed Message: This message will appear when transaction will get f
 
 Transaction Settlement: Allows you to specify if approved transactions should be automatically marked for settlement.
 
-Authorization Hash: Required. Enable Authorization Verification Hash (SHA-256) in both this module and your PlugnPay account.
+Authorization Hash: Recommended. Enable Authorization Verification Hash (SHA-256) in both this module and your PlugnPay account.
 
-Authorization Hash Key: Required. Enter the Verification Key from PlugnPay Security Administration. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].
+Authorization Hash Key: Enter the Verification Key from PlugnPay Security Administration. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].
 
 Authorization Hash Fields: Fieldset to use with authhash validation. (NOTE: This must match the fields selected with your PlugnPay account.)
 
@@ -97,6 +97,12 @@ Orders with a pending gateway response are placed on-hold until settlement compl
 == Screenshots ==
 
 == Changelog ==
+= 1.2.1 - 2026-08-27 =
+* Require PHP 8.2+ (PCI DSS 6.3.3; PHP 8.1 is past vendor security support)
+* Group gateway settings into labeled sections; hide authorization hash and divert fields until enabled
+* Allow activating alongside API Credit Card and Tokenization (shared PCI helpers defined once)
+* Authorization Hash (SHA-256) is recommended, not required; checkout proceeds if it is disabled
+
 = 1.2.0 =
 * PCI DSS: require Authorization Hash (SHA-256) and block checkout if it is not configured
 * PCI DSS: require PHP 8.1+ and HTTPS on the storefront (local/development excepted)
@@ -155,7 +161,8 @@ Orders with a pending gateway response are placed on-hold until settlement compl
 * First Version
 
 == Upgrade Notice ==
-= 1.2.0 =
-Upgrade is required. Authorization Hash (SHA-256) and HTTPS are now required. PHP 8.1 or higher is required.
+= 1.2.1 =
+Upgrade is required for versions below 1.2.0. HTTPS is required. PHP 8.2 or higher is required.
+Authorization Hash (SHA-256) is recommended, not required.
 
 == Arbitrary section ==

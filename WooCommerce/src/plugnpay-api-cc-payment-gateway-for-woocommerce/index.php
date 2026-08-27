@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay API Credit Card Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process API Credit Card Payments with PlugnPay gateway.
- * Version: 1.2.1
+ * Version: 1.2.2
  * Author: PlugnPay
  * Author URI: https://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_cc
@@ -93,14 +93,14 @@ function woocommerce_plugnpay_api_cc_init() {
         'plugnpay-api-cc-checkout',
         plugins_url('assets/css/checkout.css', __FILE__),
         array(),
-        '1.2.1'
+        '1.2.2'
       );
 
       wp_enqueue_script(
         'plugnpay-api-cc-checkout',
         plugins_url('assets/js/checkout.js', __FILE__),
         array('jquery'),
-        '1.2.1',
+        '1.2.2',
         true
       );
 
@@ -138,13 +138,13 @@ function woocommerce_plugnpay_api_cc_init() {
         'plugnpay-api-cc-admin-settings',
         plugins_url('assets/css/admin-settings.css', __FILE__),
         array(),
-        '1.2.1'
+        '1.2.2'
       );
       wp_enqueue_script(
         'plugnpay-api-cc-admin-settings',
         plugins_url('assets/js/admin-settings.js', __FILE__),
         array('jquery'),
-        '1.2.1',
+        '1.2.2',
         true
       );
       wp_localize_script(
@@ -245,18 +245,18 @@ function woocommerce_plugnpay_api_cc_init() {
           'title'       => __('Authorization Verification Hash (SHA-256)', 'woocommerce_plugnpay_api_cc'),
           'type'        => 'title',
           'class'       => 'plugnpay-api-cc-settings-section',
-          'description' => __('Required. Enable this in both the module and PlugnPay Merchant Admin → Security Administration. The key and fieldset must match.', 'woocommerce_plugnpay_api_cc'),
+          'description' => __('Recommended. Enable this in both the module and PlugnPay Merchant Admin → Security Administration. The key and fieldset must match.', 'woocommerce_plugnpay_api_cc'),
         ),
         'authhash' => array(
           'title'       => __('Authorization Hash', 'woocommerce_plugnpay_api_cc'),
           'type'        => 'checkbox',
-          'label'       => __('Enable Authorization Verification Hash (SHA-256). Required.', 'woocommerce_plugnpay_api_cc'),
+          'label'       => __('Enable Authorization Verification Hash (SHA-256). Recommended.', 'woocommerce_plugnpay_api_cc'),
           'default'     => 'yes',
         ),
         'authhash_key' => array(
           'title'       => __('Authorization Hash Key', 'woocommerce_plugnpay_api_cc'),
           'type'        => 'password',
-          'description' => __('Required. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].', 'woocommerce_plugnpay_api_cc'),
+          'description' => __('Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].', 'woocommerce_plugnpay_api_cc'),
           'default'     => '',
           'custom_attributes' => array(
             'autocomplete' => 'new-password',
@@ -362,7 +362,7 @@ function woocommerce_plugnpay_api_cc_init() {
       }
 
       if (!$this->is_authhash_configured()) {
-        echo '<div class="error"><p>' . esc_html__('PlugnPay API CC: Authorization Verification Hash and key are required before checkout can proceed.', 'woocommerce_plugnpay_api_cc') . '</p></div>';
+        echo '<div class="notice notice-warning"><p>' . esc_html__('PlugnPay API CC: Authorization Verification Hash (SHA-256) is recommended. Enable it here and in PlugnPay Security Administration with a matching key.', 'woocommerce_plugnpay_api_cc') . '</p></div>';
       }
 
       if (!plugnpay_pci_storefront_is_secure()) {
@@ -797,11 +797,6 @@ function woocommerce_plugnpay_api_cc_init() {
         return array('result' => 'failure');
       }
 
-      if (!$this->is_authhash_configured()) {
-        wc_add_notice(__('(Transaction Error) Payment gateway is not configured for Authorization Hash.', 'woocommerce_plugnpay_api_cc'), 'error');
-        return array('result' => 'failure');
-      }
-
       if (!plugnpay_pci_storefront_is_secure()) {
         wc_add_notice(__('(Transaction Error) Secure HTTPS checkout is required.', 'woocommerce_plugnpay_api_cc'), 'error');
         return array('result' => 'failure');
@@ -938,20 +933,22 @@ function woocommerce_plugnpay_api_cc_init() {
         $plugnpayapi_args['authtype'] = 'authonly';
       }
 
-      $timestamp = gmdate("YmdHis", time());
-      $authhash_key = plugnpay_pci_resolve_authhash_key(
-        $this->get_plain_secret('authhash_key'),
-        $currencyCode,
-        $this->settings['divert_currency'] == 'yes'
-      );
-      $string_fields = plugnpay_pci_authhash_string_fields(
-        $this->settings['authhash_fields'],
-        $order_id,
-        $order_amount,
-        $gatewayAccount
-      );
-      $plugnpayapi_args['authhash'] = plugnpay_pci_authhash($authhash_key . $timestamp . $string_fields);
-      $plugnpayapi_args['transacttime'] = $timestamp;
+      if ($this->is_authhash_configured()) {
+        $timestamp = gmdate("YmdHis", time());
+        $authhash_key = plugnpay_pci_resolve_authhash_key(
+          $this->get_plain_secret('authhash_key'),
+          $currencyCode,
+          $this->settings['divert_currency'] == 'yes'
+        );
+        $string_fields = plugnpay_pci_authhash_string_fields(
+          $this->settings['authhash_fields'],
+          $order_id,
+          $order_amount,
+          $gatewayAccount
+        );
+        $plugnpayapi_args['authhash'] = plugnpay_pci_authhash($authhash_key . $timestamp . $string_fields);
+        $plugnpayapi_args['transacttime'] = $timestamp;
+      }
 
       if ($this->settings['giftcard_allow'] == 'yes') {
         $mpgiftcard = $this->get_posted_field('pnp_mpgiftcard');

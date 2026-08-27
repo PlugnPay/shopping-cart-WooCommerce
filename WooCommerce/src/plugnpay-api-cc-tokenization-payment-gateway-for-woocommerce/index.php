@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay API CC Tokenization Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to process API credit card payments with PlugnPay card-on-file tokenization (authprev).
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: PlugnPay
  * Author URI: https://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_api_cc_tokenization
@@ -100,14 +100,14 @@ function woocommerce_plugnpay_api_cc_tokenization_init() {
         'plugnpay-api-cc-tokenization-checkout',
         plugins_url('assets/css/checkout.css', __FILE__),
         array(),
-        '1.1.0'
+        '1.1.1'
       );
 
       wp_enqueue_script(
         'plugnpay-api-cc-tokenization-checkout',
         plugins_url('assets/js/checkout.js', __FILE__),
         array('jquery'),
-        '1.1.0',
+        '1.1.1',
         true
       );
 
@@ -182,12 +182,12 @@ function woocommerce_plugnpay_api_cc_tokenization_init() {
           'authhash'        => array(
               'title'          => __('Authorization Hash', 'woocommerce_plugnpay_api_cc_tokenization'),
               'type'           => 'checkbox',
-              'label'          => __('Required. Enable Authorization Verification Hash (SHA-256). Must be enabled in your PlugnPay account with a matching key.', 'woocommerce_plugnpay_api_cc_tokenization'),
+              'label'          => __('Recommended. Enable Authorization Verification Hash (SHA-256). Must be enabled in your PlugnPay account with a matching key.', 'woocommerce_plugnpay_api_cc_tokenization'),
               'default'        => 'yes'),
           'authhash_key'    => array(
              'title'           => __('Authorization Hash Key', 'woocommerce_plugnpay_api_cc_tokenization'),
              'type'            => 'password',
-             'description'     => __('Required. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3]. Must match your PlugnPay account.', 'woocommerce_plugnpay_api_cc_tokenization'),
+             'description'     => __('Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3]. Must match your PlugnPay account.', 'woocommerce_plugnpay_api_cc_tokenization'),
              'default'         => '',
              'custom_attributes' => array('autocomplete' => 'new-password')),
           'authhash_fields' => array(
@@ -268,7 +268,7 @@ function woocommerce_plugnpay_api_cc_tokenization_init() {
       }
 
       if (!$this->is_authhash_configured()) {
-        echo '<div class="error"><p>' . esc_html__('PlugnPay API CC Tokenization: Authorization Verification Hash and key are required before checkout can proceed.', 'woocommerce_plugnpay_api_cc_tokenization') . '</p></div>';
+        echo '<div class="notice notice-warning"><p>' . esc_html__('PlugnPay API CC Tokenization: Authorization Verification Hash (SHA-256) is recommended. Enable it here and in PlugnPay Security Administration with a matching key.', 'woocommerce_plugnpay_api_cc_tokenization') . '</p></div>';
       }
 
       if (!plugnpay_pci_storefront_is_secure()) {
@@ -823,11 +823,6 @@ function woocommerce_plugnpay_api_cc_tokenization_init() {
         return array('result' => 'failure');
       }
 
-      if (!$this->is_authhash_configured()) {
-        wc_add_notice(__('(Transaction Error) Payment gateway is not configured for Authorization Hash.', 'woocommerce_plugnpay_api_cc_tokenization'), 'error');
-        return array('result' => 'failure');
-      }
-
       if (!plugnpay_pci_storefront_is_secure()) {
         wc_add_notice(__('(Transaction Error) Secure HTTPS checkout is required.', 'woocommerce_plugnpay_api_cc_tokenization'), 'error');
         return array('result' => 'failure');
@@ -886,11 +881,6 @@ function woocommerce_plugnpay_api_cc_tokenization_init() {
 
       if (empty($this->settings['gateway_account']) || $this->get_plain_secret('remote_password') === '') {
         wc_add_notice(__('(Transaction Error) Payment gateway is not configured.', 'woocommerce_plugnpay_api_cc_tokenization'), 'error');
-        return array('result' => 'failure');
-      }
-
-      if (!$this->is_authhash_configured()) {
-        wc_add_notice(__('(Transaction Error) Payment gateway is not configured for Authorization Hash.', 'woocommerce_plugnpay_api_cc_tokenization'), 'error');
         return array('result' => 'failure');
       }
 
@@ -1440,6 +1430,10 @@ function woocommerce_plugnpay_api_cc_tokenization_init() {
     }
 
     private function apply_authhash(&$plugnpayapi_args, $gatewayAccount, $order_amount, $order_id, $currencyCode) {
+      if (!$this->is_authhash_configured()) {
+        return;
+      }
+
       $timestamp = gmdate('YmdHis', time());
       $authhash_key = plugnpay_pci_resolve_authhash_key(
         $this->get_plain_secret('authhash_key'),

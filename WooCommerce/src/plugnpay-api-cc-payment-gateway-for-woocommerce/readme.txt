@@ -6,7 +6,7 @@ Tags: woocommerce, plugnpay, payment, gateway, API, CC, credit card, debit card
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 8.2
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -27,7 +27,7 @@ Few features of this plugin:
 2. No redirecting to other URL
 3. Easy to install and configure
 4. Option to configure success & failure message
-5. HTTPS required; Authorization Verification Hash (SHA-256) required
+5. HTTPS required; Authorization Verification Hash (SHA-256) recommended
 6. Remote Client Password and hash keys stored encrypted at rest
 7. Optional Giftcard split payment ability
 8. Optional divert payments based upon currency selected
@@ -51,7 +51,7 @@ To configure this checkout option:
 9. Under 'Payment Gateways' you will find all the available gateways, select 'PlugnPay API CC' option
 10. On this page you will find options to configure the plugin for use with WooCommerce
 11. Modify the configurable elements accordingly
-[* NOTE: At minimum, enable the gateway, enter Gateway Account, Remote Client Password, Authorization Hash, and Authorization Hash Key. Matching settings must be enabled in PlugnPay Merchant Admin.]
+[* NOTE: At minimum, enable the gateway, enter Gateway Account and Remote Client Password. Authorization Hash (SHA-256) is recommended; enable it here and in PlugnPay Merchant Admin.]
 
 ---------------------------------------------
 Enable/Disable: Used to enable/disable this payment ability, once the plug-in itself has been activated.
@@ -71,9 +71,9 @@ Transaction Failed Message: This message will appear when transaction will get f
 Transaction Settlement: Allows you to specify if approved transactions should be automatically marked for settlement.
 
 
-Authorization Hash: Required. Enable Authorization Verification Hash (SHA-256) in both this module and your PlugnPay account.
+Authorization Hash: Recommended. Enable Authorization Verification Hash (SHA-256) in both this module and your PlugnPay account.
 
-Authorization Hash Key: Required. Enter the Verification Key from PlugnPay Security Administration. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].
+Authorization Hash Key: Enter the Verification Key from PlugnPay Security Administration. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].
 
 Authorization Hash Fields: Fieldset to use with authhash validation. (NOTE: This must match the fields selected with your PlugnPay account.)
 
@@ -101,6 +101,10 @@ No, a merchant must have a giftcard account setup with a supported merchant proc
 == Screenshots ==
 
 == Changelog ==
+= 1.2.2 - 2026-08-27 =
+* Allow activating alongside API ACH and Tokenization (shared PCI helpers defined once)
+* Authorization Hash (SHA-256) is recommended, not required; checkout proceeds if it is disabled
+
 = 1.2.1 - 2026-08-27 =
 * Require PHP 8.2+ (PCI DSS 6.3.3; PHP 8.1 is past vendor security support)
 * Group gateway settings into labeled sections; hide authorization hash, giftcard, and divert fields until enabled
@@ -162,6 +166,7 @@ No, a merchant must have a giftcard account setup with a supported merchant proc
 == Upgrade Notice ==
 * Upgrade is required for versions below 1.2.0. Authorization Hash (SHA-256) and HTTPS are now required.
 * 1.2.1 (2026-08-27) requires PHP 8.2 or higher.
+* 1.2.2 (2026-08-27) is required if API ACH or Tokenization is also active. Authorization Hash is recommended, not required.
 
 == Arbitrary section ==
 

@@ -6,7 +6,7 @@ Tags: woocommerce plugnpay.com, plugnpay.com, payment gateway, woocommerce, wooc
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.1.11
+Stable tag: 1.1.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,7 +22,7 @@ Requires WordPress 6.0+, WooCommerce 8.0+, PHP 8.1+, and HTTPS on the storefront
 
 1. HTTPS required for checkout and payment return URLs
 2. Card data is collected on PlugnPay’s servers, not WooCommerce
-3. Authorization Verification Hash (SHA-256) required
+3. Authorization Verification Hash (SHA-256) very highly recommended
 4. Payment callbacks accepted only from PlugnPay callback server IPs
 5. Optional Response Verification Hash on callbacks
 6. Easy to install and configure
@@ -47,7 +47,7 @@ To configure this checkout option:
 7. Go to WooCommerce => Settings
 8. On the 'Settings' page, select 'Payments'
 9. Select 'PlugnPay SSv2 Payment Gateway For WooCommerce'
-10. Configure the plugin. At minimum: enable the gateway, enter Gateway Username, enable Authorization Hash, and enter the Authorization Hash Key. Matching settings must be enabled in PlugnPay Merchant Admin.
+10. Configure the plugin. At minimum: enable the gateway and enter Gateway Username. Authorization Hash (SHA-256) is very highly recommended; enable it here and in PlugnPay Merchant Admin.
 
 ---------------------------------------------
 Enable/Disable: Used to enable/disable this payment ability, once the plug-in itself has been activated.
@@ -66,9 +66,9 @@ Transaction Failed Message: This message will appear upon the transaction is dec
 
 Transaction Settlement: Select if you'd like the cart to mark approved payments for settlement for you.
 
-Authorization Hash: Required. Enable Authorization Verification Hash (SHA-256) in both this module and your PlugnPay account.
+Authorization Hash: Very highly recommended. Enable Authorization Verification Hash (SHA-256) in both this module and your PlugnPay account.
 
-Authorization Hash Key: Required. Enter the Verification Key from PlugnPay Security Administration. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].
+Authorization Hash Key: Enter the Verification Key from PlugnPay Security Administration. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].
 
 Authorization Hash Fields: Select a fieldset to validate upon and configure your PlugnPay account to match.
 
@@ -92,6 +92,9 @@ Yes. HTTPS is required for checkout and payment return URLs.
 * None Available
 
 == Changelog ==
+= 1.1.12 - 2026-08-27 =
+* Authorization Hash (SHA-256) is very highly recommended, not required; checkout proceeds if it is disabled
+
 = 1.1.11 =
 * Hidden PlugnPay POST captures a full themed WooCommerce thank-you or pay page (no empty body, no 302)
 * Point success/decline URLs at order-received and order-pay instead of wc-api
@@ -185,8 +188,9 @@ Yes. HTTPS is required for checkout and payment return URLs.
 * Alpha Version
 
 == Upgrade Notice ==
-* Upgrade is required for versions below 1.1.9. Authorization Hash and HTTPS are now required. PHP 8.1 or higher is required.
+* Upgrade is required for versions below 1.1.9. HTTPS is required. PHP 8.1 or higher is required.
 * 1.1.10 restores the Smart Screens hosted response theme after payment.
+* 1.1.12 (2026-08-27): Authorization Hash is very highly recommended, not required.
 
 == Arbitrary section ==
 * WooCommerce Blocks Compatibility

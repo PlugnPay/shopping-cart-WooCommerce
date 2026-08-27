@@ -76,5 +76,8 @@ plugnpay_pci_assert(
 );
 plugnpay_pci_assert(plugnpay_api_cc_minimum_php_version() === '8.2', 'minimum PHP is 8.2');
 
+require dirname($base) . '/plugnpay-api-ach-payment-gateway-for-woocommerce/includes/pci.php';
+plugnpay_pci_assert(function_exists('plugnpay_pci_authhash'), 'pci helpers coexist with API ACH copy');
+
 echo $failed === 0 ? "\nAll tests passed.\n" : "\n{$failed} test(s) failed.\n";
 exit($failed === 0 ? 0 : 1);

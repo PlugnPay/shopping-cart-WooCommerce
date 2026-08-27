@@ -14,9 +14,9 @@ PlugnPay payment modules for WooCommerce.
 
 | | |
 |---|---|
-| Download | [woocommerce_api_cc_module_1.2.1_20260827.zip](./WooCommerce/woocommerce_api_cc_module_1.2.1_20260827.zip) |
+| Download | [woocommerce_api_cc_module_1.2.2_20260827.zip](./WooCommerce/woocommerce_api_cc_module_1.2.2_20260827.zip) |
 | Source | [src/plugnpay-api-cc-…](./WooCommerce/src/plugnpay-api-cc-payment-gateway-for-woocommerce/) |
-| Version | v1.2.1 (2026-08-27) |
+| Version | v1.2.2 (2026-08-27) |
 | Checkout | Onsite card fields |
 | Card/bank data on your server | Yes |
 | PCI scope | Higher |
@@ -25,9 +25,9 @@ PlugnPay payment modules for WooCommerce.
 
 | | |
 |---|---|
-| Download | [woocommerce_api_ach_module.zip](./WooCommerce/woocommerce_api_ach_module.zip) |
+| Download | [woocommerce_api_ach_module_1.2.1_20260827.zip](./WooCommerce/woocommerce_api_ach_module_1.2.1_20260827.zip) |
 | Source | [src/plugnpay-api-ach-…](./WooCommerce/src/plugnpay-api-ach-payment-gateway-for-woocommerce/) |
-| Version | v1.2.0 |
+| Version | v1.2.1 (2026-08-27) |
 | Checkout | Onsite ACH fields |
 | Card/bank data on your server | Yes |
 | PCI scope | Higher |
@@ -36,9 +36,9 @@ PlugnPay payment modules for WooCommerce.
 
 | | |
 |---|---|
-| Download | [woocommerce_api_cc_tokenization_module.zip](./WooCommerce/woocommerce_api_cc_tokenization_module.zip) |
+| Download | [woocommerce_api_cc_tokenization_module_1.1.1_20260827.zip](./WooCommerce/woocommerce_api_cc_tokenization_module_1.1.1_20260827.zip) |
 | Source | [src/plugnpay-api-cc-tokenization-…](./WooCommerce/src/plugnpay-api-cc-tokenization-payment-gateway-for-woocommerce/) |
-| Version | v1.1.0 |
+| Version | v1.1.1 (2026-08-27) |
 | Checkout | Onsite card fields + saved cards |
 | Card/bank data on your server | Yes (new card); saved cards use authprev |
 | PCI scope | Higher |
@@ -47,9 +47,9 @@ PlugnPay payment modules for WooCommerce.
 
 | | |
 |---|---|
-| Download | [woocommerce_ss2_module.zip](./WooCommerce/woocommerce_ss2_module.zip) |
+| Download | [woocommerce_ss2_module_1.1.12_20260827.zip](./WooCommerce/woocommerce_ss2_module_1.1.12_20260827.zip) |
 | Source | [src/plugnpay-ss2-…](./WooCommerce/src/plugnpay-ss2-payment-gateway-for-woocommerce/) |
-| Version | v1.1.11 |
+| Version | v1.1.12 (2026-08-27) |
 | Checkout | Redirect → `https://pay1.plugnpay.com/pay/` |
 | Card/bank data on your server | No |
 | PCI scope | Lower |
@@ -89,7 +89,7 @@ The **API Credit Card Tokenization** module adds card-on-file (saved cards) for 
 - Separate modules for Credit Card, ACH/eCheck, and Credit Card Tokenization.
 - Customer never leaves your site or sees the PlugnPay billing pages.
 - Storefront HTTPS is required.
-- Authorization Verification Hash (SHA-256) is required. Currency divert options available.
+- Authorization Verification Hash (SHA-256) is recommended. Currency divert options available.
 
 ### Smart Screens v2
 
@@ -98,7 +98,7 @@ The **API Credit Card Tokenization** module adds card-on-file (saved cards) for 
 - WooCommerce does **not** collect sensitive payment data at checkout.
 - Customer is redirected to PlugnPay, then returned after approval or decline.
 - HTTPS on your store is required.
-- Authorization Verification Hash (SHA-256) is required.
+- Authorization Verification Hash (SHA-256) is very highly recommended.
 
 ## WooCommerce Blocks Compatibility
 

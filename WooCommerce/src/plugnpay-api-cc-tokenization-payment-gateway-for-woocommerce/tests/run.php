@@ -60,5 +60,8 @@ plugnpay_pci_assert(plugnpay_pci_encrypt_secret($encrypted) === $encrypted, 'do 
 plugnpay_pci_assert(plugnpay_pci_persist_encrypted_secret($encrypted, '') === $encrypted, 'blank submit keeps ciphertext');
 plugnpay_pci_assert(plugnpay_pci_is_encrypted_secret(plugnpay_pci_persist_encrypted_secret('legacy', '')), 'blank submit migrates plaintext');
 
+require dirname($base) . '/plugnpay-api-cc-payment-gateway-for-woocommerce/includes/pci.php';
+plugnpay_pci_assert(function_exists('plugnpay_pci_authhash'), 'pci helpers coexist with API CC copy');
+
 echo $failed === 0 ? "\nAll tests passed.\n" : "\n{$failed} test(s) failed.\n";
 exit($failed === 0 ? 0 : 1);

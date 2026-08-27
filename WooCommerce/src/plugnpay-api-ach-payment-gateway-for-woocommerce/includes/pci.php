@@ -1,7 +1,12 @@
 <?php
 /**
  * Shared PCI helpers for PlugnPay WooCommerce API modules.
+ *
+ * Each API plugin ships a copy of this file. Define helpers only once so
+ * Credit Card, ACH, and Tokenization can be active together.
  */
+
+if (!function_exists('plugnpay_pci_authhash_string_fields')) :
 
 /**
  * @param string $fieldset
@@ -248,3 +253,5 @@ function plugnpay_pci_generate_password_html($gateway, $key, $data, $text_domain
   <?php
   return ob_get_clean();
 }
+
+endif;

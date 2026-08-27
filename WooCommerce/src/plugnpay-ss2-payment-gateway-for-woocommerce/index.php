@@ -3,7 +3,7 @@
  * Plugin Name: PlugnPay SSv2 Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process Smart Screens v2 Payments with PlugnPay gateway.
- * Version: 1.1.11
+ * Version: 1.1.12
  * Author: PlugnPay
  * Author URI: https://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_ss2
@@ -85,7 +85,7 @@ function woocommerce_plugnpay_ss2_init() {
         'plugnpay-ss2-checkout',
         plugins_url('assets/css/checkout.css', __FILE__),
         array(),
-        '1.1.11'
+        '1.1.12'
       );
     }
 
@@ -173,13 +173,13 @@ function woocommerce_plugnpay_ss2_init() {
         'authhash' => array(
           'title'       => __('Authorization Hash', 'woocommerce_plugnpay_ss2'),
           'type'        => 'checkbox',
-          'label'       => __('Required. Enable Authorization Verification Hash (SHA-256). Must be enabled in your PlugnPay account with a matching key.', 'woocommerce_plugnpay_ss2'),
+          'label'       => __('Enable Authorization Verification Hash (SHA-256). Very highly recommended. Must be enabled in your PlugnPay account with a matching key.', 'woocommerce_plugnpay_ss2'),
           'default'     => 'yes',
         ),
         'authhash_key' => array(
           'title'       => __('Authorization Hash Key', 'woocommerce_plugnpay_ss2'),
           'type'        => 'password',
-          'description' => __('Required. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3]. Must match your PlugnPay account.', 'woocommerce_plugnpay_ss2'),
+          'description' => __('Very highly recommended. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3]. Must match your PlugnPay account.', 'woocommerce_plugnpay_ss2'),
           'default'     => '',
           'custom_attributes' => array(
             'autocomplete' => 'new-password',
@@ -330,8 +330,8 @@ function woocommerce_plugnpay_ss2_init() {
       }
 
       if (!$this->is_authhash_configured()) {
-        echo '<div class="error"><p>';
-        echo esc_html__('PlugnPay SSv2: Authorization Verification Hash and key are required before checkout can proceed. Enable the matching settings in PlugnPay Merchant Admin → Security Administration.', 'woocommerce_plugnpay_ss2');
+        echo '<div class="notice notice-warning"><p>';
+        echo esc_html__('PlugnPay SSv2: Authorization Verification Hash (SHA-256) is very highly recommended. Enable it here and in PlugnPay Merchant Admin → Security Administration with a matching key.', 'woocommerce_plugnpay_ss2');
         echo '</p></div>';
       }
 
@@ -386,11 +386,6 @@ function woocommerce_plugnpay_ss2_init() {
 
       if (empty($this->settings['gateway_account'])) {
         wc_add_notice(__('Payment gateway is not configured.', 'woocommerce_plugnpay_ss2'), 'error');
-        return array('result' => 'failure');
-      }
-
-      if (!$this->is_authhash_configured()) {
-        wc_add_notice(__('Payment gateway is not configured for Authorization Hash.', 'woocommerce_plugnpay_ss2'), 'error');
         return array('result' => 'failure');
       }
 
@@ -760,10 +755,6 @@ function woocommerce_plugnpay_ss2_init() {
         return '<p>' . esc_html__('Invalid order.', 'woocommerce_plugnpay_ss2') . '</p>';
       }
 
-      if (!$this->is_authhash_configured()) {
-        return '<p>' . esc_html__('Payment gateway is not configured for Authorization Hash.', 'woocommerce_plugnpay_ss2') . '</p>';
-      }
-
       $order_id = $order->get_id();
       $gateway_account = $this->settings['gateway_account'];
       $currency_code = $order->get_currency();
@@ -822,17 +813,19 @@ function woocommerce_plugnpay_ss2_init() {
 
       $plugnpay_args['pb_post_auth'] = ($this->settings['post_auth'] === 'yes') ? 'yes' : 'no';
 
-      $string_fields = plugnpay_ss2_authhash_string_fields(
-        $this->settings['authhash_fields'],
-        $order_id,
-        $order_amount,
-        $gateway_account
-      );
-      $timestamp = gmdate('YmdHis', time());
-      $authhash_key = $this->get_authhash_key_for_order($order, $gateway_account);
-      $hash_string = $authhash_key . $timestamp . $string_fields;
-      $plugnpay_args['pt_transaction_hash'] = plugnpay_ss2_transaction_hash($hash_string);
-      $plugnpay_args['pt_transaction_time'] = $timestamp;
+      if ($this->is_authhash_configured()) {
+        $string_fields = plugnpay_ss2_authhash_string_fields(
+          $this->settings['authhash_fields'],
+          $order_id,
+          $order_amount,
+          $gateway_account
+        );
+        $timestamp = gmdate('YmdHis', time());
+        $authhash_key = $this->get_authhash_key_for_order($order, $gateway_account);
+        $hash_string = $authhash_key . $timestamp . $string_fields;
+        $plugnpay_args['pt_transaction_hash'] = plugnpay_ss2_transaction_hash($hash_string);
+        $plugnpay_args['pt_transaction_time'] = $timestamp;
+      }
 
       if ($this->settings['giftcard_allow'] === 'yes') {
         $plugnpay_args['pd_transaction_payment_type'] = 'mpgiftcard';
