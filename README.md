@@ -14,9 +14,9 @@ PlugnPay payment modules for WooCommerce.
 
 | | |
 |---|---|
-| Download | [woocommerce_api_cc_module.zip](./WooCommerce/woocommerce_api_cc_module.zip) |
+| Download | [woocommerce_api_cc_module_1.2.1_20260827.zip](./WooCommerce/woocommerce_api_cc_module_1.2.1_20260827.zip) |
 | Source | [src/plugnpay-api-cc-…](./WooCommerce/src/plugnpay-api-cc-payment-gateway-for-woocommerce/) |
-| Version | v1.2.0 |
+| Version | v1.2.1 (2026-08-27) |
 | Checkout | Onsite card fields |
 | Card/bank data on your server | Yes |
 | PCI scope | Higher |

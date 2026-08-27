@@ -1,6 +1,6 @@
 ====================================================
 PlugnPay API Credit Card Module
-Payment Module for WooCommerce — module v1.2.0
+Payment Module for WooCommerce — module v1.2.1 (2026-08-27)
 ====================================================
 
 ***** IMPORTANT NOTES *****
@@ -10,7 +10,7 @@ will be given to help diagnose/address problems with this module.
 Requirements:
   - WordPress 6.0+
   - WooCommerce 8.0+
-  - PHP 8.1+ (PHP 8.2+ recommended)
+  - PHP 8.2+ (PHP 8.3+ recommended)
   - HTTPS on the storefront (required for checkout)
   - PHP cURL
 
@@ -32,7 +32,7 @@ Use classic checkout if Blocks causes problems.
 To Install:
 
 1. Preferred: In WordPress → Plugins → Add New → Upload Plugin,
-   upload woocommerce_api_cc_module.zip.
+   upload woocommerce_api_cc_module_1.2.1_20260827.zip.
 
    Or unzip into wp-content/plugins/ so you have:
      wp-content/plugins/plugnpay-api-cc-payment-gateway-for-woocommerce/...

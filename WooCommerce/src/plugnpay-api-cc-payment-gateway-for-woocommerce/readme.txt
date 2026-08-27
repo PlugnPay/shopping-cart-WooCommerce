@@ -5,8 +5,8 @@ Site link: https://www.plugnpay.com
 Tags: woocommerce, plugnpay, payment, gateway, API, CC, credit card, debit card
 Requires at least: 6.0
 Tested up to: 6.8
-Requires PHP: 8.1
-Stable tag: 1.2.0
+Requires PHP: 8.2
+Stable tag: 1.2.1
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -18,7 +18,7 @@ PlugnPay API Credit Card Payment Gateway for WooCommerce makes your website read
 
 PlugnPay is a widely used payment gateway to process payments online and accepts Visa, MasterCard, Discover and other variants payment options.
 
-Requires WordPress 6.0+, WooCommerce 8.0+, PHP 8.1+, and HTTPS on the storefront. Collecting cards onsite increases PCI scope versus hosted Smart Screens.
+Requires WordPress 6.0+, WooCommerce 8.0+, PHP 8.2+, and HTTPS on the storefront. Collecting cards onsite increases PCI scope versus hosted Smart Screens.
 
 = Features =
 Few features of this plugin:
@@ -51,7 +51,7 @@ To configure this checkout option:
 9. Under 'Payment Gateways' you will find all the available gateways, select 'PlugnPay API CC' option
 10. On this page you will find options to configure the plugin for use with WooCommerce
 11. Modify the configurable elements accordingly
-[* NOTE: At minimum, check the Enable checkbox & enter your username into the Gateway Username field.  All other fields are optional.]
+[* NOTE: At minimum, enable the gateway, enter Gateway Account, Remote Client Password, Authorization Hash, and Authorization Hash Key. Matching settings must be enabled in PlugnPay Merchant Admin.]
 
 ---------------------------------------------
 Enable/Disable: Used to enable/disable this payment ability, once the plug-in itself has been activated.
@@ -101,6 +101,10 @@ No, a merchant must have a giftcard account setup with a supported merchant proc
 == Screenshots ==
 
 == Changelog ==
+= 1.2.1 - 2026-08-27 =
+* Require PHP 8.2+ (PCI DSS 6.3.3; PHP 8.1 is past vendor security support)
+* Group gateway settings into labeled sections; hide authorization hash, giftcard, and divert fields until enabled
+
 = 1.2.0 =
 * PCI DSS: require Authorization Hash (SHA-256) and block checkout if it is not configured
 * PCI DSS: require PHP 8.1+ and HTTPS on the storefront (local/development excepted)
@@ -156,7 +160,8 @@ No, a merchant must have a giftcard account setup with a supported merchant proc
 * First Version
 
 == Upgrade Notice ==
-* Upgrade is required for versions below 1.2.0. Authorization Hash (SHA-256) and HTTPS are now required. PHP 8.1 or higher is required.
+* Upgrade is required for versions below 1.2.0. Authorization Hash (SHA-256) and HTTPS are now required.
+* 1.2.1 (2026-08-27) requires PHP 8.2 or higher.
 
 == Arbitrary section ==
 
