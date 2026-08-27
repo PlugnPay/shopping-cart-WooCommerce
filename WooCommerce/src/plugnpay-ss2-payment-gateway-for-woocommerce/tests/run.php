@@ -7,6 +7,7 @@ $base = dirname(__DIR__);
 require $base . '/includes/callback-ip.php';
 require $base . '/includes/crypto.php';
 require $base . '/includes/amounts.php';
+require $base . '/includes/admin-ui.php';
 
 $failed = 0;
 
@@ -88,21 +89,72 @@ plugnpay_ss2_assert(plugnpay_ss2_decrypt_secret($encrypted) === 'plain-secret', 
 plugnpay_ss2_assert(plugnpay_ss2_decrypt_secret('legacy-plaintext') === 'legacy-plaintext', 'legacy plaintext passthrough');
 plugnpay_ss2_assert(plugnpay_ss2_encrypt_secret($encrypted) === $encrypted, 'do not double-encrypt');
 
+plugnpay_ss2_assert(
+  plugnpay_ss2_response_hash_fields_for_fieldset('3') === 'FinalStatus,card-amount,publisher-name',
+  'response hash fieldset 3'
+);
+plugnpay_ss2_assert(
+  plugnpay_ss2_response_hash_string_fields(
+    'FinalStatus,card-amount,publisher-name',
+    array(
+      'pi_response_status' => 'success',
+      'pt_transaction_amount' => '10',
+      'pt_gateway_account' => 'pnpdemo',
+    )
+  ) === 'success10.00pnpdemo',
+  'response hash string fields alphabetical order'
+);
+
 $resp_source_key = 'respkey';
-$resp_ok = hash('sha256', 'respkeypnpdemo200812081623591234510.00');
-plugnpay_ss2_assert(
-  plugnpay_ss2_response_hash_valid($resp_ok, $resp_source_key, 'PNPDEMO', '2008120816235912345', '10.00'),
-  'response hash SHA-256'
+$resp_posted = array(
+  'pi_response_status' => 'success',
+  'pt_transaction_amount' => '10.00',
+  'pt_gateway_account' => 'pnpdemo',
 );
-$resp_md5 = md5('respkeypnpdemo200812081623591234510.00');
+$resp_ok = md5('respkey' . 'success10.00pnpdemo');
 plugnpay_ss2_assert(
-  plugnpay_ss2_response_hash_valid($resp_md5, $resp_source_key, 'pnpdemo', '2008120816235912345', '10.00'),
-  'response hash MD5 fallback'
+  plugnpay_ss2_response_hash_valid($resp_ok, $resp_source_key, '3', $resp_posted),
+  'response hash MD5 fieldset preset'
 );
 plugnpay_ss2_assert(
-  !plugnpay_ss2_response_hash_valid($resp_ok, 'wrong', 'pnpdemo', '2008120816235912345', '10.00'),
+  plugnpay_ss2_response_hash_valid($resp_ok, $resp_source_key, 'FinalStatus,card-amount,publisher-name', $resp_posted),
+  'response hash MD5 explicit field list'
+);
+plugnpay_ss2_assert(
+  !plugnpay_ss2_response_hash_valid(hash('sha256', 'respkeysuccess10.00pnpdemo'), $resp_source_key, '3', $resp_posted),
+  'response hash rejects SHA-256'
+);
+plugnpay_ss2_assert(
+  !plugnpay_ss2_response_hash_valid($resp_ok, 'wrong', '3', $resp_posted),
   'response hash rejects wrong key'
 );
+
+$all_fields_posted = array(
+  'pi_response_status' => 'success',
+  'pt_transaction_amount' => '10.5',
+  'pt_currency' => 'usd',
+  'pt_order_id' => '2008120816235912345',
+  'pt_gateway_account' => 'pnpdemo',
+);
+plugnpay_ss2_assert(
+  plugnpay_ss2_response_hash_string_fields(plugnpay_ss2_response_hash_fields_for_fieldset('4'), $all_fields_posted) === 'success10.50USD2008120816235912345pnpdemo',
+  'response hash all fields with formatting'
+);
+
+$dependent = plugnpay_ss2_admin_dependent_fields();
+plugnpay_ss2_assert(
+  isset($dependent['authhash']) && $dependent['authhash'] === array('authhash_key', 'authhash_fields'),
+  'auth hash fields depend on enable checkbox'
+);
+plugnpay_ss2_assert(
+  isset($dependent['response_hash']) && $dependent['response_hash'] === array('response_hash_key', 'response_hash_fields'),
+  'response hash fields depend on enable checkbox'
+);
+plugnpay_ss2_assert(
+  isset($dependent['divert_currency']) && $dependent['divert_currency'] === array('divert_accounts'),
+  'divert accounts depend on divert checkbox'
+);
+plugnpay_ss2_assert(plugnpay_ss2_minimum_php_version() === '8.2', 'minimum PHP is 8.2');
 
 echo $failed === 0 ? "\nAll tests passed.\n" : "\n{$failed} test(s) failed.\n";
 exit($failed === 0 ? 0 : 1);

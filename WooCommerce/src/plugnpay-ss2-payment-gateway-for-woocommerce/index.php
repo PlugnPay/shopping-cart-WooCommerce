@@ -3,12 +3,12 @@
  * Plugin Name: PlugnPay SSv2 Payment Gateway For WooCommerce
  * Plugin URI: https://github.com/PlugnPay/shopping-cart-WooCommerce
  * Description: Extends WooCommerce to Process Smart Screens v2 Payments with PlugnPay gateway.
- * Version: 1.1.11
+ * Version: 1.1.13
  * Author: PlugnPay
  * Author URI: https://www.plugnpay.com
  * Text Domain: woocommerce_plugnpay_ss2
  * Requires at least: 6.0
- * Requires PHP: 8.1
+ * Requires PHP: 8.2
  * Requires Plugins: woocommerce
  * License: GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.txt
@@ -19,6 +19,7 @@ defined('ABSPATH') || exit;
 require_once __DIR__ . '/includes/callback-ip.php';
 require_once __DIR__ . '/includes/crypto.php';
 require_once __DIR__ . '/includes/amounts.php';
+require_once __DIR__ . '/includes/admin-ui.php';
 
 add_action('before_woocommerce_init', 'woocommerce_plugnpay_ss2_declare_hpos_compatibility');
 
@@ -35,7 +36,7 @@ function woocommerce_plugnpay_ss2_init() {
     return;
   }
 
-  if (version_compare(PHP_VERSION, '8.1', '<')) {
+  if (version_compare(PHP_VERSION, plugnpay_ss2_minimum_php_version(), '<')) {
     add_action('admin_notices', 'woocommerce_plugnpay_ss2_php_notice');
     return;
   }
@@ -70,6 +71,7 @@ function woocommerce_plugnpay_ss2_init() {
       add_action('woocommerce_receipt_plugnpay', array($this, 'receipt_page'));
       add_action('woocommerce_thankyou_plugnpay', array($this, 'thankyou_page'));
       add_action('wp_enqueue_scripts', array($this, 'enqueue_checkout_assets'));
+      add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
       add_action('admin_notices', array($this, 'admin_security_notices'));
     }
 
@@ -85,7 +87,46 @@ function woocommerce_plugnpay_ss2_init() {
         'plugnpay-ss2-checkout',
         plugins_url('assets/css/checkout.css', __FILE__),
         array(),
-        '1.1.11'
+        '1.1.13'
+      );
+    }
+
+    /**
+     * Section headings and show/hide for dependent gateway settings.
+     *
+     * @param string $hook
+     */
+    public function enqueue_admin_assets($hook) {
+      if ($hook !== 'woocommerce_page_wc-settings') {
+        return;
+      }
+
+      $tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : '';
+      $section = isset($_GET['section']) ? sanitize_text_field(wp_unslash($_GET['section'])) : '';
+      if ($tab !== 'checkout' || $section !== $this->id) {
+        return;
+      }
+
+      wp_enqueue_style(
+        'plugnpay-ss2-admin-settings',
+        plugins_url('assets/css/admin-settings.css', __FILE__),
+        array(),
+        '1.1.13'
+      );
+      wp_enqueue_script(
+        'plugnpay-ss2-admin-settings',
+        plugins_url('assets/js/admin-settings.js', __FILE__),
+        array('jquery'),
+        '1.1.13',
+        true
+      );
+      wp_localize_script(
+        'plugnpay-ss2-admin-settings',
+        'plugnpaySs2Admin',
+        array(
+          'gatewayId'        => $this->id,
+          'dependentFields'  => plugnpay_ss2_admin_dependent_fields(),
+        )
       );
     }
 
@@ -120,6 +161,12 @@ function woocommerce_plugnpay_ss2_init() {
 
     public function init_form_fields() {
       $this->form_fields = array(
+        'section_checkout' => array(
+          'title'       => __('Checkout display', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-ss2-settings-section plugnpay-ss2-settings-section-first',
+          'description' => __('How this payment method appears on the checkout page.', 'woocommerce_plugnpay_ss2'),
+        ),
         'enabled' => array(
           'title'   => __('Enable/Disable', 'woocommerce_plugnpay_ss2'),
           'type'    => 'checkbox',
@@ -131,35 +178,32 @@ function woocommerce_plugnpay_ss2_init() {
           'type'        => 'text',
           'description' => __('This controls the title which the user sees during checkout.', 'woocommerce_plugnpay_ss2'),
           'default'     => __('Credit Card', 'woocommerce_plugnpay_ss2'),
+          'desc_tip'    => true,
         ),
         'description' => array(
           'title'       => __('Description:', 'woocommerce_plugnpay_ss2'),
           'type'        => 'textarea',
           'description' => __('This controls the description which the user sees during checkout.', 'woocommerce_plugnpay_ss2'),
           'default'     => __('Pay securely online through PlugnPay Secure Servers.', 'woocommerce_plugnpay_ss2'),
+          'desc_tip'    => true,
+        ),
+        'section_gateway' => array(
+          'title'       => __('Gateway account', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-ss2-settings-section',
+          'description' => __('PlugnPay account used for this store, and how approved payments are captured.', 'woocommerce_plugnpay_ss2'),
         ),
         'gateway_account' => array(
           'title'       => __('Gateway Username', 'woocommerce_plugnpay_ss2'),
           'type'        => 'text',
-          'description' => __('Username issued by PlugnPay at time of sign up.'),
+          'description' => __('Username issued by PlugnPay at time of sign up.', 'woocommerce_plugnpay_ss2'),
         ),
         'cards_allowed' => array(
           'title'       => __('Card Types Allowed', 'woocommerce_plugnpay_ss2'),
           'type'        => 'text',
-          'description' => __('Card types you are allowed to accept. Refer to the payment method specifications for possible values.'),
+          'description' => __('Card types you are allowed to accept. Refer to the payment method specifications for possible values.', 'woocommerce_plugnpay_ss2'),
           'default'     => __('Visa,Mastercard,Amex,Discover', 'woocommerce_plugnpay_ss2'),
-        ),
-        'success_message' => array(
-          'title'       => __('Transaction Success Message', 'woocommerce_plugnpay_ss2'),
-          'type'        => 'textarea',
-          'description' => __('Message to be displayed on successful transaction.', 'woocommerce_plugnpay_ss2'),
-          'default'     => __('Your payment has been processed successfully.', 'woocommerce_plugnpay_ss2'),
-        ),
-        'failed_message' => array(
-          'title'       => __('Transaction Failed Message', 'woocommerce_plugnpay_ss2'),
-          'type'        => 'textarea',
-          'description' => __('Message to be displayed on failed transaction.', 'woocommerce_plugnpay_ss2'),
-          'default'     => __('Your transaction has been declined.', 'woocommerce_plugnpay_ss2'),
+          'desc_tip'    => true,
         ),
         'post_auth' => array(
           'title'       => __('Transaction Settlement', 'woocommerce_plugnpay_ss2'),
@@ -168,18 +212,45 @@ function woocommerce_plugnpay_ss2_init() {
             'yes' => __('Authorize and Settle', 'woocommerce_plugnpay_ss2'),
             'no'  => __('Authorize Only', 'woocommerce_plugnpay_ss2'),
           ),
-          'description' => __("Transaction Settlement. If you are not sure what to use set to 'Authorize and Settle'", 'woocommerce_plugnpay_ss2'),
+          'description' => __("If you are not sure what to use, set to 'Authorize and Settle'.", 'woocommerce_plugnpay_ss2'),
+          'desc_tip'    => true,
+        ),
+        'section_messages' => array(
+          'title'       => __('Customer messages', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-ss2-settings-section',
+          'description' => __('Shown to the shopper after payment succeeds or fails.', 'woocommerce_plugnpay_ss2'),
+        ),
+        'success_message' => array(
+          'title'       => __('Transaction Success Message', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'textarea',
+          'description' => __('Message to be displayed on successful transaction.', 'woocommerce_plugnpay_ss2'),
+          'default'     => __('Your payment has been processed successfully.', 'woocommerce_plugnpay_ss2'),
+          'desc_tip'    => true,
+        ),
+        'failed_message' => array(
+          'title'       => __('Transaction Failed Message', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'textarea',
+          'description' => __('Message to be displayed on failed transaction.', 'woocommerce_plugnpay_ss2'),
+          'default'     => __('Your transaction has been declined.', 'woocommerce_plugnpay_ss2'),
+          'desc_tip'    => true,
+        ),
+        'section_authhash' => array(
+          'title'       => __('Authorization Verification Hash (SHA-256)', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-ss2-settings-section',
+          'description' => __('Required. Enable this in both the module and PlugnPay Merchant Admin → Security Administration. The key and fieldset must match.', 'woocommerce_plugnpay_ss2'),
         ),
         'authhash' => array(
           'title'       => __('Authorization Hash', 'woocommerce_plugnpay_ss2'),
           'type'        => 'checkbox',
-          'label'       => __('Required. Enable Authorization Verification Hash (SHA-256). Must be enabled in your PlugnPay account with a matching key.', 'woocommerce_plugnpay_ss2'),
+          'label'       => __('Enable Authorization Verification Hash (SHA-256). Required.', 'woocommerce_plugnpay_ss2'),
           'default'     => 'yes',
         ),
         'authhash_key' => array(
           'title'       => __('Authorization Hash Key', 'woocommerce_plugnpay_ss2'),
           'type'        => 'password',
-          'description' => __('Required. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3]. Must match your PlugnPay account.', 'woocommerce_plugnpay_ss2'),
+          'description' => __('Required. Leave blank to keep the current key. If using Divert Currency, list each currency with its associated key [i.e. USD:key1,BBD:key2,CAD:key3].', 'woocommerce_plugnpay_ss2'),
           'default'     => '',
           'custom_attributes' => array(
             'autocomplete' => 'new-password',
@@ -195,15 +266,48 @@ function woocommerce_plugnpay_ss2_init() {
           ),
           'description' => __('Fieldset to use with authhash validation. Must configure your PlugnPay account to match.', 'woocommerce_plugnpay_ss2'),
           'default'     => '3',
+          'desc_tip'    => true,
+        ),
+        'section_response_hash' => array(
+          'title'       => __('Response Verification Hash (MD5)', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-ss2-settings-section',
+          'description' => __('Optional. Enable in both the module and PlugnPay Security Administration. Selected fields are hashed in alphabetical order.', 'woocommerce_plugnpay_ss2'),
+        ),
+        'response_hash' => array(
+          'title'       => __('Response Verification Hash', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'checkbox',
+          'label'       => __('Enable Response Verification Hash (MD5).', 'woocommerce_plugnpay_ss2'),
+          'default'     => 'no',
         ),
         'response_hash_key' => array(
           'title'       => __('Response Verification Hash Key', 'woocommerce_plugnpay_ss2'),
           'type'        => 'password',
-          'description' => __('Recommended. Leave blank to keep the current key. Used to verify pt_transaction_response_hash on callbacks. Configure Response Verification Hash in PlugnPay Security Administration.', 'woocommerce_plugnpay_ss2'),
+          'description' => __('Required when enabled. Leave blank to keep the current key.', 'woocommerce_plugnpay_ss2'),
           'default'     => '',
           'custom_attributes' => array(
             'autocomplete' => 'new-password',
           ),
+        ),
+        'response_hash_fields' => array(
+          'title'       => __('Response Verification Hash Fields', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'select',
+          'options'     => array(
+            '1' => 'publisher-name',
+            '2' => 'card-amount, publisher-name',
+            '3' => 'FinalStatus, card-amount, publisher-name',
+            '4' => 'FinalStatus, card-amount, currency, orderID, publisher-name',
+            '5' => 'FinalStatus, orderID, card-amount, publisher-name',
+          ),
+          'description' => __('Fieldset to use with response hash validation. Selected fields are hashed in alphabetical order. Must configure your PlugnPay account to match.', 'woocommerce_plugnpay_ss2'),
+          'default'     => '3',
+          'desc_tip'    => true,
+        ),
+        'section_optional' => array(
+          'title'       => __('Optional features', 'woocommerce_plugnpay_ss2'),
+          'type'        => 'title',
+          'class'       => 'plugnpay-ss2-settings-section',
+          'description' => __('Giftcard split payments and currency diversion require matching PlugnPay account features.', 'woocommerce_plugnpay_ss2'),
         ),
         'giftcard_allow' => array(
           'title'   => __('Giftcard Acceptance', 'woocommerce_plugnpay_ss2'),
@@ -214,7 +318,7 @@ function woocommerce_plugnpay_ss2_init() {
         'divert_currency' => array(
           'title'       => __('Divert Currency', 'woocommerce_plugnpay_ss2'),
           'type'        => 'checkbox',
-          'description' => __('Enable to divert currency to alt account. Multiple gateway accounts required, each setup for a different currency.', 'woocommerce_plugnpay_ss2'),
+          'label'       => __('Enable to divert payments for specific currencies to another gateway account.', 'woocommerce_plugnpay_ss2'),
           'default'     => 'no',
         ),
         'divert_accounts' => array(
@@ -335,9 +439,9 @@ function woocommerce_plugnpay_ss2_init() {
         echo '</p></div>';
       }
 
-      if ($this->get_plain_secret('response_hash_key') === '') {
+      if ($this->get_option('response_hash') === 'yes' && !$this->is_response_hash_configured()) {
         echo '<div class="notice notice-warning"><p>';
-        echo esc_html__('PlugnPay SSv2: Response Verification Hash key is not set. Callbacks still require PlugnPay server IPs; adding the response hash key is recommended.', 'woocommerce_plugnpay_ss2');
+        echo esc_html__('PlugnPay SSv2: Response Verification Hash is enabled but the key is not set. Callback hash validation will fail until a key is configured in PlugnPay Merchant Admin → Security Administration.', 'woocommerce_plugnpay_ss2');
         echo '</p></div>';
       }
 
@@ -347,9 +451,9 @@ function woocommerce_plugnpay_ss2_init() {
         echo '</p></div>';
       }
 
-      if (version_compare(PHP_VERSION, '8.2', '<')) {
+      if (version_compare(PHP_VERSION, '8.3', '<')) {
         echo '<div class="notice notice-warning"><p>';
-        echo esc_html__('PlugnPay SSv2: PHP 8.2 or higher is recommended. PHP 8.1 is past vendor security support.', 'woocommerce_plugnpay_ss2');
+        echo esc_html__('PlugnPay SSv2: PHP 8.3 or higher is recommended. PHP 8.2 security support ends 31 Dec 2026.', 'woocommerce_plugnpay_ss2');
         echo '</p></div>';
       }
     }
@@ -655,14 +759,18 @@ function woocommerce_plugnpay_ss2_init() {
       }
 
       $response_key = $this->get_plain_secret('response_hash_key');
-      if ($response_key !== '') {
+      if ($this->is_response_hash_configured()) {
         $posted_hash = isset($_POST['pt_transaction_response_hash']) ? sanitize_text_field(wp_unslash($_POST['pt_transaction_response_hash'])) : '';
-        $publisher = isset($_POST['pt_gateway_account'])
-          ? strtolower(sanitize_text_field(wp_unslash($_POST['pt_gateway_account'])))
-          : strtolower((string) $this->settings['gateway_account']);
-        $hash_order_id = $transaction_id !== '' ? $transaction_id : (string) $order->get_id();
+        $posted_fields = array(
+          'pi_response_status'   => isset($_POST['pi_response_status']) ? sanitize_text_field(wp_unslash($_POST['pi_response_status'])) : '',
+          'pt_transaction_amount' => $posted_amount,
+          'pt_currency'          => $posted_currency,
+          'pt_order_id'          => $transaction_id,
+          'pt_gateway_account'   => isset($_POST['pt_gateway_account']) ? sanitize_text_field(wp_unslash($_POST['pt_gateway_account'])) : '',
+        );
+        $response_fields = isset($this->settings['response_hash_fields']) ? $this->settings['response_hash_fields'] : '3';
 
-        if (!plugnpay_ss2_response_hash_valid($posted_hash, $response_key, $publisher, $hash_order_id, plugnpay_ss2_format_amount($posted_amount))) {
+        if (!plugnpay_ss2_response_hash_valid($posted_hash, $response_key, $response_fields, $posted_fields)) {
           $this->log_callback_event('Rejected callback: response hash mismatch for order ' . $order->get_id());
           return false;
         }
@@ -703,6 +811,15 @@ function woocommerce_plugnpay_ss2_init() {
       return isset($this->settings['authhash'])
         && $this->settings['authhash'] === 'yes'
         && $this->get_plain_secret('authhash_key') !== '';
+    }
+
+    /**
+     * @return bool
+     */
+    private function is_response_hash_configured() {
+      return isset($this->settings['response_hash'])
+        && $this->settings['response_hash'] === 'yes'
+        && $this->get_plain_secret('response_hash_key') !== '';
     }
 
     /**
@@ -895,7 +1012,7 @@ function woocommerce_plugnpay_ss2_version_notice() {
 
 function woocommerce_plugnpay_ss2_php_notice() {
   echo '<div class="error"><p>';
-  echo esc_html__('PlugnPay SSv2 requires PHP 8.1 or higher.', 'woocommerce_plugnpay_ss2');
+  echo esc_html__('PlugnPay SSv2 requires PHP 8.2 or higher.', 'woocommerce_plugnpay_ss2');
   echo '</p></div>';
 }
 

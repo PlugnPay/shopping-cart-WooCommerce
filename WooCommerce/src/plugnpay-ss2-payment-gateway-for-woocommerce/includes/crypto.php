@@ -126,16 +126,99 @@ function plugnpay_ss2_decrypt_secret($stored) {
 }
 
 /**
- * Verify a Smart Screens response hash using SHA-256, with MD5 fallback.
+ * Response hash field names mapped to callback POST keys.
+ *
+ * @return array<string, string>
+ */
+function plugnpay_ss2_response_hash_field_map() {
+  return array(
+    'FinalStatus'    => 'pi_response_status',
+    'card-amount'    => 'pt_transaction_amount',
+    'currency'       => 'pt_currency',
+    'orderID'        => 'pt_order_id',
+    'publisher-name' => 'pt_gateway_account',
+  );
+}
+
+/**
+ * Resolve configured response hash fields for a fieldset preset.
+ *
+ * @param string $fieldset
+ * @return string Comma-separated field names in alphabetical order
+ */
+function plugnpay_ss2_response_hash_fields_for_fieldset($fieldset) {
+  $presets = array(
+    '1' => 'publisher-name',
+    '2' => 'card-amount,publisher-name',
+    '3' => 'FinalStatus,card-amount,publisher-name',
+    '4' => 'FinalStatus,card-amount,currency,orderID,publisher-name',
+    '5' => 'FinalStatus,orderID,card-amount,publisher-name',
+  );
+
+  $fieldset = (string) $fieldset;
+
+  return isset($presets[$fieldset]) ? $presets[$fieldset] : $presets['3'];
+}
+
+/**
+ * Format a callback value for response hash string construction.
+ *
+ * @param string $field_name
+ * @param mixed  $value
+ * @return string
+ */
+function plugnpay_ss2_response_hash_format_value($field_name, $value) {
+  if ($field_name === 'card-amount') {
+    return plugnpay_ss2_format_amount($value);
+  }
+
+  if ($field_name === 'currency') {
+    return strtoupper(trim((string) $value));
+  }
+
+  return (string) $value;
+}
+
+/**
+ * Build the field substring used in the response verification hash.
+ *
+ * Selected fields are concatenated in alphabetical order by field name.
+ *
+ * @param string $field_list Comma-separated field names
+ * @param array  $posted     Callback POST values keyed by POST field name
+ * @return string
+ */
+function plugnpay_ss2_response_hash_string_fields($field_list, array $posted) {
+  $map = plugnpay_ss2_response_hash_field_map();
+  $fields = array_filter(array_map('trim', explode(',', (string) $field_list)));
+  sort($fields, SORT_STRING);
+
+  $parts = '';
+  foreach ($fields as $field_name) {
+    if (!isset($map[$field_name])) {
+      continue;
+    }
+
+    $post_key = $map[$field_name];
+    $value = isset($posted[$post_key]) ? $posted[$post_key] : '';
+    $parts .= plugnpay_ss2_response_hash_format_value($field_name, $value);
+  }
+
+  return $parts;
+}
+
+/**
+ * Verify a Smart Screens response hash using MD5.
+ *
+ * PlugnPay returns pt_transaction_response_hash as MD5(key + selected fields).
  *
  * @param string $posted_hash
  * @param string $key
- * @param string $publisher
- * @param string $order_id
- * @param string $amount
+ * @param string $field_list Comma-separated field names or fieldset preset id
+ * @param array  $posted     Callback POST values keyed by POST field name
  * @return bool
  */
-function plugnpay_ss2_response_hash_valid($posted_hash, $key, $publisher, $order_id, $amount) {
+function plugnpay_ss2_response_hash_valid($posted_hash, $key, $field_list, array $posted) {
   $posted_hash = strtolower(trim((string) $posted_hash));
   $key = (string) $key;
 
@@ -143,8 +226,11 @@ function plugnpay_ss2_response_hash_valid($posted_hash, $key, $publisher, $order
     return false;
   }
 
-  $source = $key . strtolower((string) $publisher) . (string) $order_id . (string) $amount;
+  if (strpos((string) $field_list, ',') === false && ctype_digit((string) $field_list)) {
+    $field_list = plugnpay_ss2_response_hash_fields_for_fieldset($field_list);
+  }
 
-  return hash_equals(hash('sha256', $source), $posted_hash)
-    || hash_equals(md5($source), $posted_hash);
+  $source = $key . plugnpay_ss2_response_hash_string_fields($field_list, $posted);
+
+  return hash_equals(md5($source), $posted_hash);
 }

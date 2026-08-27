@@ -47,9 +47,9 @@ PlugnPay payment modules for WooCommerce.
 
 | | |
 |---|---|
-| Download | [woocommerce_ss2_module.zip](./WooCommerce/woocommerce_ss2_module.zip) |
+| Download | [woocommerce_ss2_module_1.1.13_20260827.zip](./WooCommerce/woocommerce_ss2_module_1.1.13_20260827.zip) |
 | Source | [src/plugnpay-ss2-…](./WooCommerce/src/plugnpay-ss2-payment-gateway-for-woocommerce/) |
-| Version | v1.1.11 |
+| Version | v1.1.13 (2026-08-27) |
 | Checkout | Redirect → `https://pay1.plugnpay.com/pay/` |
 | Card/bank data on your server | No |
 | PCI scope | Lower |

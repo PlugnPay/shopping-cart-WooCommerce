@@ -1,6 +1,6 @@
 ====================================================
 PlugnPay Smart Screens v2 Module
-Payment Module for WooCommerce — module v1.1.11
+Payment Module for WooCommerce — module v1.1.13 (2026-08-27)
 ====================================================
 
 ***** IMPORTANT NOTES *****
@@ -14,7 +14,7 @@ sensitive payment data at checkout.
 Requirements:
   - WordPress 6.0+
   - WooCommerce 8.0+
-  - PHP 8.1+ (PHP 8.2+ recommended)
+  - PHP 8.2+ (PHP 8.3+ recommended)
   - HTTPS on the storefront (required for checkout)
 
 Authorization Verification Hash (SHA-256) is required. Enable it in
@@ -30,7 +30,7 @@ Use classic checkout if Blocks causes problems.
 To Install:
 
 1. Preferred: In WordPress → Plugins → Add New → Upload Plugin,
-   upload woocommerce_ss2_module.zip.
+   upload woocommerce_ss2_module_1.1.13_20260827.zip.
 
    Or unzip into wp-content/plugins/ so you have:
      wp-content/plugins/plugnpay-ss2-payment-gateway-for-woocommerce/...
@@ -45,7 +45,9 @@ To Install:
    - Gateway Username
    - Authorization Hash (required, SHA-256)
    - Authorization Hash Key (required)
-   - Response Verification Hash Key (recommended)
+   - Response Verification Hash (optional, MD5)
+   - Response Verification Hash Key (required when enabled)
+   - Response Verification Hash Fields (must match PlugnPay)
 
    Matching Authorization and Response Verification Hash settings must
    be enabled in PlugnPay Merchant Admin.

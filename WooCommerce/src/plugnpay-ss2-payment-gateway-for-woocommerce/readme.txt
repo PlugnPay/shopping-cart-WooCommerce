@@ -5,8 +5,8 @@ Site link: https://www.plugnpay.com
 Tags: woocommerce plugnpay.com, plugnpay.com, payment gateway, woocommerce, woocommerce payment gateway
 Requires at least: 6.0
 Tested up to: 6.8
-Requires PHP: 8.1
-Stable tag: 1.1.11
+Requires PHP: 8.2
+Stable tag: 1.1.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,7 @@ Accept payments on your WooCommerce website with PlugnPay’s secure hosted Smar
 
 PlugnPay SSv2 Payment Gateway for WooCommerce redirects customers to PlugnPay hosted Smart Screens. WooCommerce does not collect card data on the storefront.
 
-Requires WordPress 6.0+, WooCommerce 8.0+, PHP 8.1+, and HTTPS on the storefront.
+Requires WordPress 6.0+, WooCommerce 8.0+, PHP 8.2+, and HTTPS on the storefront.
 
 = Features =
 
@@ -72,7 +72,11 @@ Authorization Hash Key: Required. Enter the Verification Key from PlugnPay Secur
 
 Authorization Hash Fields: Select a fieldset to validate upon and configure your PlugnPay account to match.
 
-Response Verification Hash Key: Recommended. Enter the Response Verification Hash key from PlugnPay Security Administration. Leave blank to keep the current key.
+Response Verification Hash: Optional. Enable Response Verification Hash (MD5) in both this module and your PlugnPay account.
+
+Response Verification Hash Key: Required when Response Verification Hash is enabled. Enter the Response Verification Hash key from PlugnPay Security Administration. Leave blank to keep the current key.
+
+Response Verification Hash Fields: Select a fieldset to validate upon and configure your PlugnPay account to match. Selected fields are hashed in alphabetical order.
 
 Giftcard Acceptance: Allows you to accept Giftcards at time of checkout & process it as a split-payment. (Note: You must have Giftcard ability enabled in your PlugnPay account to use this.)
 
@@ -92,6 +96,15 @@ Yes. HTTPS is required for checkout and payment return URLs.
 * None Available
 
 == Changelog ==
+= 1.1.13 - 2026-08-27 =
+* Require PHP 8.2+ (PCI DSS 6.3.3; PHP 8.1 is past vendor security support)
+* Group gateway settings into labeled sections; hide authorization hash, response hash, and divert fields until enabled
+
+= 1.1.12 - 2026-08-27 =
+* Add Response Verification Hash enable setting and fieldset selection
+* Verify pt_transaction_response_hash as MD5 of key + selected fields in alphabetical order (matches PlugnPay)
+* Reject SHA-256 response hashes
+
 = 1.1.11 =
 * Hidden PlugnPay POST captures a full themed WooCommerce thank-you or pay page (no empty body, no 302)
 * Point success/decline URLs at order-received and order-pay instead of wc-api
@@ -185,8 +198,10 @@ Yes. HTTPS is required for checkout and payment return URLs.
 * Alpha Version
 
 == Upgrade Notice ==
-* Upgrade is required for versions below 1.1.9. Authorization Hash and HTTPS are now required. PHP 8.1 or higher is required.
+* Upgrade is required for versions below 1.1.9. Authorization Hash and HTTPS are now required. PHP 8.2 or higher is required.
 * 1.1.10 restores the Smart Screens hosted response theme after payment.
+* 1.1.12 (2026-08-27) verifies Response Verification Hash as MD5 using the selected fieldset. Enable the setting and match your PlugnPay account.
+* 1.1.13 (2026-08-27) requires PHP 8.2 or higher.
 
 == Arbitrary section ==
 * WooCommerce Blocks Compatibility

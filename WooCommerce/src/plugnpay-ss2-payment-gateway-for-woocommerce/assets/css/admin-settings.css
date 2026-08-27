@@ -1,0 +1,19 @@
+h3.wc-settings-sub-title.plugnpay-ss2-settings-section {
+  margin: 1.75em 0 0.35em;
+  padding: 0.9em 0 0;
+  border-top: 1px solid #dcdcde;
+  font-size: 1.15em;
+}
+
+h3.wc-settings-sub-title.plugnpay-ss2-settings-section-first {
+  margin-top: 0.5em;
+  padding-top: 0;
+  border-top: none;
+}
+
+h3.wc-settings-sub-title.plugnpay-ss2-settings-section + div {
+  color: #50575e;
+  margin: 0 0 0.85em;
+  max-width: 52em;
+  line-height: 1.45;
+}
